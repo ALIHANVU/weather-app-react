@@ -193,7 +193,10 @@
   }
 
   .ios-modal.visible {
-    @apply opacity-100 visible pointer-events-auto bg-black/50 backdrop-blur-ios-md;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    @apply bg-black/50 backdrop-blur-ios-md;
   }
 
   .ios-modal-content {
