@@ -2,44 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* МАКСИМАЛЬНО СТРОГИЕ ПРАВИЛА ДЛЯ ВСЕГО ТЕКСТА В ТЕМНОЙ ТЕМЕ */
-html.dark body,
-html.dark body * {
+/* САМЫЙ СТРОГИЙ СПОСОБ СДЕЛАТЬ ВЕСЬ ТЕКСТ В ТЕМНОЙ ТЕМЕ БЕЛЫМ */
+/* Глобальное правило */
+html.dark * {
   color: white !important;
 }
 
-/* СПЕЦИФИЧЕСКИЕ ПЕРЕОПРЕДЕЛЕНИЯ ДЛЯ ИЗВЕСТНЫХ ПРОБЛЕМНЫХ ЭЛЕМЕНТОВ */
-html.dark .ios-text-title1,
-html.dark .ios-text-title2,
-html.dark .ios-text-headline,
-html.dark .ios-text-body,
-html.dark .ios-text-subheadline,
-html.dark .ios-text-caption1,
-html.dark .ios-text-caption2,
-html.dark .text-ios-text-primary,
-html.dark .text-ios-text-secondary,
-html.dark .text-ios-text-tertiary,
-html.dark .text-[76px],
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark p, 
-html.dark span, html.dark div {
+/* Текстовые поля ввода */
+html.dark input, 
+html.dark textarea,
+html.dark .ios-search-input,
+html.dark [contenteditable] {
   color: white !important;
 }
 
-/* ИСКЛЮЧЕНИЯ ДЛЯ СПЕЦИФИЧЕСКИХ ЭЛЕМЕНТОВ С ЦВЕТНЫМ ТЕКСТОМ */
+/* Фикс для температуры */
+html.dark .text-\[76px\] {
+  color: white !important;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Максимально высокий вес селектора */
+html.dark [class] {
+  color: white !important;
+}
+
+/* ИСКЛЮЧЕНИЯ ДЛЯ ЦВЕТНЫХ ЭЛЕМЕНТОВ */
+html.dark svg *,
+html.dark [class*="lucide-"] *,
 html.dark .ios-button,
-html.dark [class*="text-ios-blue"],
-html.dark [class*="text-ios-green"],
-html.dark [class*="text-ios-red"],
-html.dark [class*="text-ios-orange"],
-html.dark [class*="text-ios-teal"],
-html.dark [class*="text-ios-purple"],
-html.dark svg,
-html.dark [class*="lucide-"] {
+html.dark .text-ios-blue,
+html.dark .text-ios-green,
+html.dark .text-ios-red,
+html.dark .text-ios-orange,
+html.dark .text-ios-teal,
+html.dark .text-ios-purple,
+html.dark [class*="text-ios-"] {
   color: inherit !important;
 }
 
-/* Сверхприоритетное правило для спанов внутри элементов */
-html.dark span:not([class*="text-ios-"]) {
+/* Особое правило для цветных кнопок */
+html.dark .bg-ios-blue {
   color: white !important;
 }
 
@@ -482,26 +485,113 @@ body {
   }
 }
 
-/* ДОПОЛНИТЕЛЬНЫЕ ПРИНУДИТЕЛЬНЫЕ СТИЛИ */
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
-html.dark p, html.dark span, html.dark div, html.dark li, html.dark a {
-  color: white !important;
+/* ПОДДЕРЖКА ТЕМНОГО РЕЖИМА В СТИЛЕ IOS */
+.ios-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ios-fill-tertiary-light);
+  border: none;
+  cursor: pointer;
+  z-index: 5;
 }
 
-/* ПЕРЕОПРЕДЕЛЕНИЕ СПЕЦИФИЧНЫХ ЭЛЕМЕНТОВ, КОТОРЫЕ ЧАСТО ВЫЗЫВАЮТ ПРОБЛЕМЫ */
-html.dark [class*="headline"], 
-html.dark [class*="title"], 
-html.dark [class*="caption"],
-html.dark [class*="body"],
-html.dark [class*="text-primary"],
-html.dark [class*="text-secondary"] {
-  color: white !important;
+.dark .ios-close-button {
+  background-color: var(--ios-fill-tertiary-dark);
 }
 
-/* Инъекция JS для принудительного применения стилей */
-@media (prefers-color-scheme: dark) {
-  :root::after {
-    content: "";
-    display: none;
+/* iOS Spinner */
+.ios-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 122, 255, 0.2);
+  border-top-color: var(--ios-blue-light);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.dark .ios-spinner {
+  border: 2px solid rgba(10, 132, 255, 0.2);
+  border-top-color: var(--ios-blue-dark);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
+
+/* Важные исправления для темного режима */
+.dark {
+  colorScheme: dark;
+}
+
+.dark input {
+  color-scheme: dark;
+}
+
+/* Фикс для элементов с inline стилями */
+html.dark *[style*="color"] {
+  color: white !important;
+}
+
+/* Особый фикс для сложных случаев */
+@media (prefers-color-scheme: dark) {
+  html.dark body * {
+    color: white !important;
+    text-shadow: 0 0 0 white !important;
+  }
+  
+  html.dark svg *, 
+  html.dark [class*="lucide-"] *,
+  html.dark .text-ios-blue,
+  html.dark .text-ios-green,
+  html.dark .text-ios-red,
+  html.dark .text-ios-orange,
+  html.dark .text-ios-teal,
+  html.dark .text-ios-purple,
+  html.dark [class*="text-ios-"] {
+    color: inherit !important;
+    text-shadow: none !important;
+  }
+  
+  html.dark .bg-ios-blue text,
+  html.dark .bg-ios-blue * {
+    color: white !important;
+  }
+}
+
+/* Фикс для iOS Safari */
+html.dark * {
+  -webkit-text-fill-color: white !important;
+}
+
+html.dark svg *, 
+html.dark [class*="lucide-"] *,
+html.dark .text-ios-blue,
+html.dark .text-ios-green,
+html.dark .text-ios-red,
+html.dark .text-ios-orange,
+html.dark .text-ios-teal,
+html.dark .text-ios-purple,
+html.dark [class*="text-ios-"] {
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* Скрипт для фиксации проблемы с цветом текста в темной теме */
+html.dark::before {
+  content: '';
+  display: none;
+  animation: dark-mode-fix 0.1ms forwards;
+}
+
+@keyframes dark-mode-fix {
+  from { color: inherit; }
+  to { color: white; }
 }
