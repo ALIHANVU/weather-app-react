@@ -2,50 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* САМЫЙ СТРОГИЙ СПОСОБ СДЕЛАТЬ ВЕСЬ ТЕКСТ В ТЕМНОЙ ТЕМЕ БЕЛЫМ */
-/* Глобальное правило */
-html.dark * {
-  color: white !important;
-}
-
-/* Текстовые поля ввода */
-html.dark input, 
-html.dark textarea,
-html.dark .ios-search-input,
-html.dark [contenteditable] {
-  color: white !important;
-}
-
-/* Фикс для температуры */
-html.dark .text-\[76px\] {
-  color: white !important;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
-}
-
-/* Максимально высокий вес селектора */
-html.dark [class] {
-  color: white !important;
-}
-
-/* ИСКЛЮЧЕНИЯ ДЛЯ ЦВЕТНЫХ ЭЛЕМЕНТОВ */
-html.dark svg *,
-html.dark [class*="lucide-"] *,
-html.dark .ios-button,
-html.dark .text-ios-blue,
-html.dark .text-ios-green,
-html.dark .text-ios-red,
-html.dark .text-ios-orange,
-html.dark .text-ios-teal,
-html.dark .text-ios-purple,
-html.dark [class*="text-ios-"] {
-  color: inherit !important;
-}
-
-/* Особое правило для цветных кнопок */
-html.dark .bg-ios-blue {
-  color: white !important;
-}
-
 /* Основные цвета iOS */
 :root {
   --ios-bg-light: #F2F2F6;
@@ -140,7 +96,7 @@ body {
 }
 
 .dark .ios-text-title1 {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-text-title2 {
@@ -152,7 +108,7 @@ body {
 }
 
 .dark .ios-text-title2 {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-text-headline {
@@ -164,7 +120,7 @@ body {
 }
 
 .dark .ios-text-headline {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-text-body {
@@ -176,7 +132,7 @@ body {
 }
 
 .dark .ios-text-body {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-text-subheadline {
@@ -188,7 +144,7 @@ body {
 }
 
 .dark .ios-text-subheadline {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-text-caption1 {
@@ -200,7 +156,7 @@ body {
 }
 
 .dark .ios-text-caption1 {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-text-caption2 {
@@ -213,7 +169,7 @@ body {
 }
 
 .dark .ios-text-caption2 {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 /* Цветовые классы */
@@ -222,7 +178,7 @@ body {
 }
 
 .dark .text-ios-text-primary {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .text-ios-text-secondary {
@@ -230,7 +186,7 @@ body {
 }
 
 .dark .text-ios-text-secondary {
-  color: var(--ios-text-secondary-dark) !important;
+  color: var(--ios-text-secondary-dark);
 }
 
 .text-ios-text-tertiary {
@@ -238,7 +194,7 @@ body {
 }
 
 .dark .text-ios-text-tertiary {
-  color: var(--ios-text-tertiary-dark) !important;
+  color: var(--ios-text-tertiary-dark);
 }
 
 .text-ios-blue {
@@ -246,7 +202,7 @@ body {
 }
 
 .dark .text-ios-blue {
-  color: var(--ios-blue-dark) !important;
+  color: var(--ios-blue-dark);
 }
 
 .text-ios-red {
@@ -254,7 +210,7 @@ body {
 }
 
 .dark .text-ios-red {
-  color: var(--ios-red-dark) !important;
+  color: var(--ios-red-dark);
 }
 
 /* iOS компоненты интерфейса */
@@ -272,12 +228,23 @@ body {
 }
 
 .dark .ios-button {
-  color: var(--ios-blue-dark) !important;
+  color: var(--ios-blue-dark);
 }
 
 .ios-button:active {
   opacity: 0.6;
   transform: scale(0.98);
+}
+
+/* Особое правило для цветных кнопок */
+.bg-ios-blue {
+  background-color: var(--ios-blue-light);
+  color: white;
+}
+
+.dark .bg-ios-blue {
+  background-color: var(--ios-blue-dark);
+  color: white;
 }
 
 /* iOS поисковое поле */
@@ -307,7 +274,7 @@ body {
 }
 
 .dark .ios-search-input {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-search-input::placeholder {
@@ -364,7 +331,7 @@ body {
 .dark .ios-modal-content {
   background-color: var(--ios-card-bg-dark);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-modal.visible .ios-modal-content {
@@ -391,7 +358,7 @@ body {
 .dark .ios-weekly-day {
   background-color: var(--ios-fill-quaternary-dark);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
 }
 
 .ios-forecast-hour {
@@ -402,6 +369,7 @@ body {
   margin: 0;
   min-width: 58px;
   padding: 10px 8px;
+  margin: 0 5px; /* Увеличиваем отступы между часами */
 }
 
 .ios-weekly-day {
@@ -474,7 +442,7 @@ body {
 }
 
 .dark .text-\[76px\] {
-  color: var(--ios-text-primary-dark) !important;
+  color: var(--ios-text-primary-dark);
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -527,71 +495,33 @@ body {
   }
 }
 
-/* Важные исправления для темного режима */
-.dark {
-  colorScheme: dark;
+/* ФИКС ТЕМНОЙ ТЕМЫ: ОСОБОЕ ПРАВИЛО ТОЛЬКО ДЛЯ ТЕМНОГО РЕЖИМА */
+html.dark h1, 
+html.dark h2, 
+html.dark h3, 
+html.dark h4, 
+html.dark h5, 
+html.dark h6,
+html.dark p, 
+html.dark span, 
+html.dark div, 
+html.dark input,
+html.dark textarea,
+html.dark .ios-search-input {
+  color: white;
 }
 
-.dark input {
-  color-scheme: dark;
+/* Заголовок температуры */
+html.dark .text-\[76px\] {
+  color: white;
 }
 
-/* Фикс для элементов с inline стилями */
-html.dark *[style*="color"] {
-  color: white !important;
-}
-
-/* Особый фикс для сложных случаев */
-@media (prefers-color-scheme: dark) {
-  html.dark body * {
-    color: white !important;
-    text-shadow: 0 0 0 white !important;
-  }
-  
-  html.dark svg *, 
-  html.dark [class*="lucide-"] *,
-  html.dark .text-ios-blue,
-  html.dark .text-ios-green,
-  html.dark .text-ios-red,
-  html.dark .text-ios-orange,
-  html.dark .text-ios-teal,
-  html.dark .text-ios-purple,
-  html.dark [class*="text-ios-"] {
-    color: inherit !important;
-    text-shadow: none !important;
-  }
-  
-  html.dark .bg-ios-blue text,
-  html.dark .bg-ios-blue * {
-    color: white !important;
-  }
-}
-
-/* Фикс для iOS Safari */
-html.dark * {
-  -webkit-text-fill-color: white !important;
-}
-
-html.dark svg *, 
-html.dark [class*="lucide-"] *,
-html.dark .text-ios-blue,
-html.dark .text-ios-green,
-html.dark .text-ios-red,
-html.dark .text-ios-orange,
-html.dark .text-ios-teal,
-html.dark .text-ios-purple,
-html.dark [class*="text-ios-"] {
-  -webkit-text-fill-color: inherit !important;
-}
-
-/* Скрипт для фиксации проблемы с цветом текста в темной теме */
-html.dark::before {
-  content: '';
-  display: none;
-  animation: dark-mode-fix 0.1ms forwards;
-}
-
-@keyframes dark-mode-fix {
-  from { color: inherit; }
-  to { color: white; }
+/* Сохраняем цвета для специальных элементов */
+html.dark svg *,
+html.dark [class*="lucide"] *,
+html.dark .bg-ios-blue,
+html.dark .bg-ios-red,
+html.dark .bg-ios-green,
+html.dark .ios-button.bg-ios-blue {
+  color: inherit;
 }
