@@ -9,6 +9,7 @@ import WeeklyForecast from './components/weather/WeeklyForecast'
 import DayModal from './components/layout/DayModal'
 import ErrorNotification from './components/shared/ErrorNotification'
 import LoadingSpinner from './components/shared/LoadingSpinner'
+import DarkModeEnforcer from './components/shared/DarkModeEnforcer' // Импортируем новый компонент
 
 // Компонент для отладки
 const DebugInfo = ({ error, isVisible }) => {
@@ -83,6 +84,9 @@ function App() {
 
   return (
     <WeatherProvider setShowWeather={setShowWeather} setError={setError} setLoading={setLoading}>
+      {/* Добавляем компонент DarkModeEnforcer */}
+      <DarkModeEnforcer darkMode={darkMode} />
+      
       <div className="ios-safe-top ios-safe-bottom ios-safe-left ios-safe-right">
         <div className="ios-container">
           {/* Секция поиска */}
