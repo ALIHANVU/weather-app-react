@@ -2,553 +2,384 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    /* iOS Light Mode Color Palette */
-    --ios-bg: 240 240 246;
-    --ios-elevated: 255 255 255;
-    --ios-separator: 228 228 230;
-    --ios-text-primary: 0 0 0;
-    --ios-text-secondary: 110 110 115;
-    --ios-text-tertiary: 152 152 157;
-    --ios-blue: 0 122 255;
-    --ios-green: 52 199 89;
-    --ios-indigo: 88 86 214;
-    --ios-orange: 255 149 0;
-    --ios-pink: 255 45 85;
-    --ios-purple: 175 82 222;
-    --ios-red: 255 59 48;
-    --ios-teal: 90 200 250;
-    --ios-yellow: 255 204 0;
-    --ios-fill-quaternary: rgba(118, 118, 128, 0.08);
-    --ios-fill-tertiary: rgba(118, 118, 128, 0.12);
-    --ios-fill-secondary: rgba(118, 118, 128, 0.16);
-    --ios-fill-primary: rgba(118, 118, 128, 0.2);
-  }
-
-  .dark {
-    /* iOS Dark Mode Color Palette */
-    --ios-bg: 0 0 0;
-    --ios-elevated: 28 28 30;
-    --ios-separator: 44 44 46;
-    --ios-text-primary: 255 255 255; /* Белый текст */
-    --ios-text-secondary: 235 235 245 / 0.6; /* Полупрозрачный белый */
-    --ios-text-tertiary: 235 235 245 / 0.4; /* Еще более полупрозрачный белый */
-    --ios-blue: 10 132 255;
-    --ios-green: 48 209 88;
-    --ios-indigo: 94 92 230;
-    --ios-orange: 255 159 10;
-    --ios-pink: 255 55 95;
-    --ios-purple: 191 90 242;
-    --ios-red: 255 69 58;
-    --ios-teal: 100 210 255;
-    --ios-yellow: 255 214 10;
-    --ios-fill-quaternary: rgba(118, 118, 128, 0.12);
-    --ios-fill-tertiary: rgba(118, 118, 128, 0.2);
-    --ios-fill-secondary: rgba(118, 118, 128, 0.24);
-    --ios-fill-primary: rgba(118, 118, 128, 0.28);
-  }
+/* КРИТИЧЕСКИ ВАЖНОЕ ПРАВИЛО - применяется для всех элементов в темной теме */
+.dark body * {
+  color: white !important;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+/* Исключения для элементов, которым нужен цветной текст */
+.dark .ios-button,
+.dark .text-ios-blue,
+.dark .text-ios-green,
+.dark .text-ios-red,
+.dark svg,
+.dark [class*="lucide-"] {
+  color: inherit !important;
+}
 
-  html {
-    font-size: 16px;
-    height: 100%;
-  }
-
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.3;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    min-height: 100%;
-    overflow-x: hidden;
-    /* Использование CSS переменных для автоматического переключения цветов */
-    background-color: rgb(var(--ios-bg));
-    color: rgb(var(--ios-text-primary));
-  }
-
-  /* Улучшенный iOS градиент фона */
-  body {
-    background-image: linear-gradient(180deg, rgba(197, 222, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
-    background-attachment: fixed;
-  }
-
-  .dark body {
-    background-image: linear-gradient(180deg, rgba(40, 60, 100, 0.08) 0%, rgba(0, 0, 0, 0) 50%);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
+/* Основные цвета iOS */
+:root {
+  --ios-bg-light: #F2F2F6;
+  --ios-card-bg-light: rgba(255, 255, 255, 0.72);
+  --ios-text-primary-light: #000000;
+  --ios-text-secondary-light: #6E6E73;
+  --ios-text-tertiary-light: #98989D;
+  --ios-blue-light: #007AFF;
+  --ios-red-light: #FF3B30;
   
-  /* Принудительно белый текст для всех элементов в тёмной теме */
-  .dark * {
-    color-scheme: dark;
-  }
+  --ios-bg-dark: #000000;
+  --ios-card-bg-dark: rgba(40, 40, 45, 0.75);
+  --ios-text-primary-dark: #FFFFFF;
+  --ios-text-secondary-dark: rgba(235, 235, 245, 0.6);
+  --ios-text-tertiary-dark: rgba(235, 235, 245, 0.4);
+  --ios-blue-dark: #0A84FF;
+  --ios-red-dark: #FF453A;
+  
+  --ios-fill-quaternary-light: rgba(118, 118, 128, 0.08);
+  --ios-fill-tertiary-light: rgba(118, 118, 128, 0.12);
+  --ios-fill-secondary-light: rgba(118, 118, 128, 0.16);
+  --ios-fill-primary-light: rgba(118, 118, 128, 0.2);
+  
+  --ios-fill-quaternary-dark: rgba(118, 118, 128, 0.12);
+  --ios-fill-tertiary-dark: rgba(118, 118, 128, 0.2);
+  --ios-fill-secondary-dark: rgba(118, 118, 128, 0.24);
+  --ios-fill-primary-dark: rgba(118, 118, 128, 0.28);
 }
 
-/* iOS-специфичные компоненты */
-@layer components {
-  /* iOS контейнер */
-  .ios-container {
-    @apply max-w-[540px] mx-auto px-4;
-    animation: ios-fade-up 0.6s cubic-bezier(0.20, 1.00, 0.30, 1.00);
-  }
-
-  /* iOS карточка - уточненная для iOS 16/17 */
-  .ios-card {
-    @apply rounded-2xl backdrop-blur-[30px] bg-opacity-60 transition-all duration-300;
-    background-color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 
-                0 0 1px rgba(0, 0, 0, 0.04);
-    border: 0.5px solid rgba(255, 255, 255, 0.3);
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .dark .ios-card {
-    background-color: rgba(30, 30, 32, 0.7);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 
-                0 0 1px rgba(255, 255, 255, 0.05);
-    border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  /* iOS кнопка */
-  .ios-button {
-    @apply bg-transparent py-2 px-3.5 font-medium text-base
-      rounded-full transition-all duration-150;
-    color: rgb(var(--ios-blue));
-    min-height: 36px;
-  }
-
-  .ios-button:active {
-    opacity: 0.6;
-    transform: scale(0.98);
-  }
-
-  .ios-button.ios-filled {
-    background-color: rgb(var(--ios-blue));
-    color: white;
-  }
-
-  .dark .ios-button {
-    color: rgb(var(--ios-blue)); /* Синий цвет для кнопок в тёмной теме */
-  }
-
-  /* iOS поисковое поле */
-  .ios-search-container {
-    @apply flex items-center rounded-full h-9 overflow-hidden
-      transition-all duration-300;
-    background-color: rgba(118, 118, 128, 0.12);
-  }
-
-  .ios-search-container:focus-within {
-    background-color: rgba(118, 118, 128, 0.15);
-  }
-
-  .dark .ios-search-container {
-    background-color: rgba(235, 235, 245, 0.08);
-  }
-
-  .dark .ios-search-container:focus-within {
-    background-color: rgba(235, 235, 245, 0.12);
-  }
-
-  /* iOS поисковое поле текст */
-  .ios-search-input {
-    @apply flex-1 h-9 border-none bg-transparent px-2 text-base
-      focus:outline-none;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-search-input::placeholder {
-    color: rgb(var(--ios-text-tertiary));
-  }
-
-  .dark .ios-search-input {
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  .dark .ios-search-input::placeholder {
-    color: rgba(255, 255, 255, 0.4); /* Полупрозрачный белый для плейсхолдера */
-  }
-
-  /* iOS лоадер */
-  .ios-spinner:before {
-    content: "";
-    @apply w-5 h-5 rounded-full inline-block;
-    border: 2px solid rgba(var(--ios-blue), 0.15);
-    border-top-color: rgb(var(--ios-blue));
-    animation: ios-spinner 1s linear infinite;
-  }
-
-  /* iOS детальные элементы */
-  .ios-detail-item {
-    @apply rounded-xl p-3.5 flex flex-col
-      transition-all duration-200;
-    background-color: rgba(118, 118, 128, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-detail-item:active {
-    @apply scale-98;
-    background-color: rgba(118, 118, 128, 0.12);
-  }
-
-  .dark .ios-detail-item {
-    background-color: rgba(235, 235, 245, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  .dark .ios-detail-item:active {
-    background-color: rgba(235, 235, 245, 0.12);
-  }
-
-  /* iOS советы и прогноз */
-  .ios-tip-item {
-    @apply rounded-xl p-3.5
-      transition-all duration-200 flex items-start;
-    background-color: rgba(118, 118, 128, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-tip-item:active {
-    @apply scale-98;
-    background-color: rgba(118, 118, 128, 0.12);
-  }
-
-  .dark .ios-tip-item {
-    background-color: rgba(235, 235, 245, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  .dark .ios-tip-item:active {
-    background-color: rgba(235, 235, 245, 0.12);
-  }
-
-  /* iOS почасовой прогноз */
-  .ios-forecast-hour {
-    @apply flex flex-col items-center justify-center m-0 min-w-[58px] 
-      py-2.5 px-2 rounded-xl transition-all duration-200;
-    background-color: rgba(118, 118, 128, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-forecast-hour:active {
-    @apply scale-98;
-    background-color: rgba(118, 118, 128, 0.12);
-  }
-
-  .dark .ios-forecast-hour {
-    background-color: rgba(235, 235, 245, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  .dark .ios-forecast-hour:active {
-    background-color: rgba(235, 235, 245, 0.12);
-  }
-
-  /* iOS недельный прогноз день */
-  .ios-weekly-day {
-    @apply grid grid-cols-[2fr_1fr_1fr] rounded-xl p-3.5
-      transition-all duration-200 items-center;
-    background-color: rgba(118, 118, 128, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.2);
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-weekly-day:active {
-    @apply scale-98;
-    background-color: rgba(118, 118, 128, 0.12);
-  }
-
-  .dark .ios-weekly-day {
-    background-color: rgba(235, 235, 245, 0.08);
-    border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  .dark .ios-weekly-day:active {
-    background-color: rgba(235, 235, 245, 0.12);
-  }
-
-  /* iOS модальное окно */
-  .ios-modal {
-    @apply fixed inset-0 w-full h-full z-50 opacity-0 invisible flex
-      justify-center items-center p-4 box-border pointer-events-none transition-all duration-300;
-  }
-
-  .ios-modal.visible {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-  }
-
-  .ios-modal-content {
-    @apply relative rounded-2xl max-w-[520px] w-full max-h-[calc(100vh-40px)]
-      overflow-y-auto p-5 shadow-xl translate-y-8 opacity-0
-      transition-all duration-300;
-    background-color: rgb(var(--ios-elevated));
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-modal.visible .ios-modal-content {
-    @apply translate-y-0 opacity-100;
-  }
-
-  .dark .ios-modal-content {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
-
-  /* iOS кнопка закрытия модального окна */
-  .ios-close-button {
-    @apply absolute top-2.5 right-2.5 w-7 h-7 rounded-full border-none
-      flex items-center justify-center
-      z-10 transition-all duration-200;
-    background-color: rgba(118, 118, 128, 0.2);
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-close-button:active {
-    background-color: rgba(118, 118, 128, 0.3);
-    transform: scale(0.95);
-  }
-
-  .dark .ios-close-button {
-    background-color: rgba(235, 235, 245, 0.2);
-    color: #ffffff; /* Явное указание белого цвета */
-  }
+/* Базовые стили */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+  background-color: var(--ios-bg-light);
+  color: var(--ios-text-primary-light);
+  background-image: linear-gradient(180deg, rgba(197, 222, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+  background-attachment: fixed;
 }
 
-/* Вспомогательные утилиты для iOS-стиля */
-@layer utilities {
-  /* iOS типографика точно как в iOS */
-  .ios-text-largetitle {
-    font-size: 34px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
-    line-height: 1.1;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-title1 {
-    font-size: 28px;
-    font-weight: 600;
-    letter-spacing: -0.4px;
-    line-height: 1.15;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-title2 {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    line-height: 1.2;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-title3 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    line-height: 1.25;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-headline {
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    line-height: 1.3;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-body {
-    font-size: 17px;
-    font-weight: 400;
-    letter-spacing: -0.2px;
-    line-height: 1.3;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-callout {
-    font-size: 16px;
-    font-weight: 400;
-    letter-spacing: -0.2px;
-    line-height: 1.3;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-subheadline {
-    font-size: 15px;
-    font-weight: 400;
-    letter-spacing: -0.1px;
-    line-height: 1.3;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-footnote {
-    font-size: 13px;
-    font-weight: 400;
-    letter-spacing: 0px;
-    line-height: 1.3;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-caption1 {
-    font-size: 12px;
-    font-weight: 400;
-    letter-spacing: 0px;
-    line-height: 1.3;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .ios-text-caption2 {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.6px;
-    line-height: 1.3;
-    text-transform: uppercase;
-    color: rgb(var(--ios-text-primary));
-  }
-
-  /* Белый текст в темной теме для всех текстовых элементов */
-  .dark .ios-text-largetitle,
-  .dark .ios-text-title1,
-  .dark .ios-text-title2,
-  .dark .ios-text-title3,
-  .dark .ios-text-headline,
-  .dark .ios-text-body,
-  .dark .ios-text-callout,
-  .dark .ios-text-subheadline,
-  .dark .ios-text-footnote,
-  .dark .ios-text-caption1,
-  .dark .ios-text-caption2 {
-    color: #ffffff !important; /* Принудительный белый текст */
-  }
-
-  /* Автоматические цвета для темной/светлой темы */
-  .text-ios-primary {
-    color: rgb(var(--ios-text-primary));
-  }
-
-  .text-ios-secondary {
-    color: rgb(var(--ios-text-secondary));
-  }
-
-  .text-ios-tertiary {
-    color: rgb(var(--ios-text-tertiary));
-  }
-
-  .text-ios-blue {
-    color: rgb(var(--ios-blue));
-  }
-
-  .text-ios-green {
-    color: rgb(var(--ios-green));
-  }
-
-  .text-ios-red {
-    color: rgb(var(--ios-red));
-  }
-
-  .text-ios-orange {
-    color: rgb(var(--ios-orange));
-  }
-
-  /* Принудительно белый цвет для текстовых классов в темной теме */
-  .dark .text-ios-primary {
-    color: #ffffff !important;
-  }
-
-  .dark .text-ios-secondary {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
-
-  .dark .text-ios-tertiary {
-    color: rgba(255, 255, 255, 0.5) !important;
-  }
-
-  .dark .text-ios-text-primary {
-    color: #ffffff !important;
-  }
-
-  .dark .text-ios-text-secondary {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
-
-  .dark .text-ios-text-tertiary {
-    color: rgba(255, 255, 255, 0.5) !important;
-  }
-
-  .bg-ios-fill-quaternary {
-    background-color: var(--ios-fill-quaternary);
-  }
-
-  .bg-ios-fill-tertiary {
-    background-color: var(--ios-fill-tertiary);
-  }
-
-  .bg-ios-fill-secondary {
-    background-color: var(--ios-fill-secondary);
-  }
-
-  .bg-ios-fill-primary {
-    background-color: var(--ios-fill-primary);
-  }
-
-  /* Масштабирование для активных состояний */
-  .scale-98 {
-    transform: scale(0.98);
-  }
-
-  /* Стили для безопасной области в iOS */
-  .ios-safe-top {
-    padding-top: max(env(safe-area-inset-top), 12px);
-  }
-
-  .ios-safe-bottom {
-    padding-bottom: max(env(safe-area-inset-bottom), 12px);
-  }
-
-  .ios-safe-left {
-    padding-left: max(env(safe-area-inset-left), 16px);
-  }
-
-  .ios-safe-right {
-    padding-right: max(env(safe-area-inset-right), 16px);
-  }
+.dark body {
+  background-color: var(--ios-bg-dark);
+  color: var(--ios-text-primary-dark);
+  background-image: linear-gradient(180deg, rgba(40, 60, 100, 0.08) 0%, rgba(0, 0, 0, 0) 50%);
 }
 
-/* Скрытие полосы прокрутки */
-@layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+/* iOS контейнер */
+.ios-container {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 0 16px;
+  animation: ios-fade-up 0.6s cubic-bezier(0.20, 1.00, 0.30, 1.00);
 }
 
-/* iOS анимации */
+/* iOS карточка */
+.ios-card {
+  border-radius: 16px;
+  background-color: var(--ios-card-bg-light);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.04);
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-card {
+  background-color: var(--ios-card-bg-dark);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 1px rgba(255, 255, 255, 0.05);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  color: var(--ios-text-primary-dark);
+}
+
+/* iOS типографика */
+.ios-text-title1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  line-height: 1.15;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-title1 {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-text-title2 {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-title2 {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-text-headline {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-headline {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-text-body {
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.2px;
+  line-height: 1.3;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-body {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-text-subheadline {
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-subheadline {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-text-caption1 {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.3;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-caption1 {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-text-caption2 {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-text-caption2 {
+  color: var(--ios-text-primary-dark);
+}
+
+/* Цветовые классы */
+.text-ios-text-primary {
+  color: var(--ios-text-primary-light);
+}
+
+.dark .text-ios-text-primary {
+  color: var(--ios-text-primary-dark);
+}
+
+.text-ios-text-secondary {
+  color: var(--ios-text-secondary-light);
+}
+
+.dark .text-ios-text-secondary {
+  color: var(--ios-text-secondary-dark);
+}
+
+.text-ios-text-tertiary {
+  color: var(--ios-text-tertiary-light);
+}
+
+.dark .text-ios-text-tertiary {
+  color: var(--ios-text-tertiary-dark);
+}
+
+.text-ios-blue {
+  color: var(--ios-blue-light);
+}
+
+.dark .text-ios-blue {
+  color: var(--ios-blue-dark);
+}
+
+.text-ios-red {
+  color: var(--ios-red-light);
+}
+
+.dark .text-ios-red {
+  color: var(--ios-red-dark);
+}
+
+/* iOS компоненты интерфейса */
+.ios-button {
+  color: var(--ios-blue-light);
+  background-color: transparent;
+  padding: 8px 14px;
+  font-weight: 500;
+  font-size: 16px;
+  border-radius: 100px;
+  transition: all 0.15s ease;
+  min-height: 36px;
+  border: none;
+  outline: none;
+}
+
+.dark .ios-button {
+  color: var(--ios-blue-dark);
+}
+
+.ios-button:active {
+  opacity: 0.6;
+  transform: scale(0.98);
+}
+
+/* iOS поисковое поле */
+.ios-search-container {
+  display: flex;
+  align-items: center;
+  border-radius: 100px;
+  height: 36px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background-color: var(--ios-fill-tertiary-light);
+}
+
+.dark .ios-search-container {
+  background-color: var(--ios-fill-tertiary-dark);
+}
+
+.ios-search-input {
+  flex: 1;
+  height: 36px;
+  border: none;
+  background-color: transparent;
+  padding: 0 8px;
+  font-size: 16px;
+  outline: none;
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-search-input {
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-search-input::placeholder {
+  color: var(--ios-text-tertiary-light);
+}
+
+.dark .ios-search-input::placeholder {
+  color: var(--ios-text-tertiary-dark);
+}
+
+/* iOS модальное окно */
+.ios-modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  box-sizing: border-box;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.ios-modal.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ios-modal-content {
+  position: relative;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: translateY(32px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  background-color: var(--ios-card-bg-light);
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-modal-content {
+  background-color: var(--ios-card-bg-dark);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-modal.visible .ios-modal-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Детальные элементы */
+.ios-detail-item, 
+.ios-tip-item, 
+.ios-forecast-hour, 
+.ios-weekly-day {
+  background-color: var(--ios-fill-quaternary-light);
+  border-radius: 12px;
+  padding: 14px;
+  transition: all 0.2s ease;
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  color: var(--ios-text-primary-light);
+}
+
+.dark .ios-detail-item, 
+.dark .ios-tip-item, 
+.dark .ios-forecast-hour, 
+.dark .ios-weekly-day {
+  background-color: var(--ios-fill-quaternary-dark);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  color: var(--ios-text-primary-dark);
+}
+
+.ios-forecast-hour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  min-width: 58px;
+  padding: 10px 8px;
+}
+
+.ios-weekly-day {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+}
+
+.ios-tip-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Анимации */
 @keyframes ios-fade-up {
   from {
     opacity: 0;
@@ -560,119 +391,60 @@
   }
 }
 
-@keyframes ios-spinner {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Улучшенные состояния наведения (только для устройств с мышью) */
+/* Hoverable состояния */
 @media (hover: hover) {
   .ios-button:hover {
     opacity: 0.85;
   }
   
-  .ios-close-button:hover {
-    background-color: rgba(118, 118, 128, 0.3);
-  }
-
-  .dark .ios-close-button:hover {
-    background-color: rgba(235, 235, 245, 0.25);
-  }
-
   .ios-detail-item:hover,
   .ios-tip-item:hover,
   .ios-forecast-hour:hover,
   .ios-weekly-day:hover {
-    background-color: rgba(118, 118, 128, 0.1);
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   }
-
+  
   .dark .ios-detail-item:hover,
   .dark .ios-tip-item:hover,
   .dark .ios-forecast-hour:hover,
   .dark .ios-weekly-day:hover {
-    background-color: rgba(235, 235, 245, 0.1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 }
 
-/* Анимация для предупреждений о погоде */
-.animate-pulse {
-  animation: ios-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Утилиты */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-@keyframes ios-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
-/* Температурный дисплей */
-.text-[76px] {
-  color: rgb(var(--ios-text-primary));
+/* Безопасные области */
+.ios-safe-top {
+  padding-top: max(env(safe-area-inset-top), 12px);
 }
 
-.dark .text-[76px] {
-  color: #ffffff !important; /* Принудительно белый цвет для температуры */
+.ios-safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
+}
+
+/* Специфичные стили для температуры */
+.text-\[76px\] {
+  color: var(--ios-text-primary-light);
+}
+
+.dark .text-\[76px\] {
+  color: var(--ios-text-primary-dark) !important;
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
 }
 
-/* Тени для температурных индикаторов */
-.dark svg {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-}
-
-/* Адаптивные стили */
+/* Адаптивность */
 @media screen and (min-width: 768px) {
   .ios-container {
     max-width: 640px;
-  }
-}
-
-/* iOS-подобные разделители */
-.ios-divider {
-  height: 1px;
-  width: 100%;
-  background-color: rgba(var(--ios-separator), 1);
-  margin: 8px 0;
-}
-
-/* iOS виджеты для краев экрана */
-.ios-edge-margin {
-  margin: 0 -16px;
-  padding: 0 16px;
-}
-
-/* iOS виджеты в карточках */
-.ios-widget-spacing {
-  margin-top: 8px;
-  margin-bottom: 16px;
-}
-
-/* Улучшенный тактильный отклик для iOS */
-.ios-haptic:active {
-  transform: scale(0.97);
-  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-/* Критически важные переопределения для темной темы */
-.dark {
-  color-scheme: dark;
-  color: #ffffff;
-}
-
-.dark *:not(.text-ios-blue, .text-ios-green, .text-ios-red, .text-ios-orange, .text-ios-teal, .text-ios-yellow, .text-ios-purple, .text-ios-indigo, .text-ios-pink, .ios-button) {
-  color: #ffffff;
-}
-
-/* Глобальное принудительное правило для перезаписи любых специфичных стилей */
-@layer utilities {
-  .dark [class*="text-"]:not(.text-ios-blue, .text-ios-green, .text-ios-red, .text-ios-orange, .text-ios-teal, .text-ios-yellow, .text-ios-purple, .text-ios-indigo, .text-ios-pink) {
-    color: #ffffff !important;
   }
 }
