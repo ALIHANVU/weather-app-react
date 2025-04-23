@@ -272,3 +272,14 @@
     padding-right: max(env(safe-area-inset-right), 16px);
   }
 }
+
+/* В конец файла index.css добавьте: */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
