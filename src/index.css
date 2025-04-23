@@ -30,17 +30,17 @@
   .dark {
     /* Улучшенные переменные темной темы для лучшей читаемости */
     --background: 220 6% 10%;
-    --foreground: 210 20% 98%; /* Светлее для лучшего контраста */
+    --foreground: 0 0% 100%; /* Чистый белый для максимальной читаемости */
     --card: 220 5% 15%; 
     --card-foreground: 0 0% 100%; /* Чистый белый для максимальной читаемости */
     --popover: 220 5% 15%;
     --popover-foreground: 0 0% 100%;
     --primary: 217.2 91.2% 65%; /* Более яркий синий */
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 217.2 32.6% 23%; /* Светлее для лучшего контраста */
     --secondary-foreground: 0 0% 100%;
     --muted: 217.2 32.6% 23%;
-    --muted-foreground: 215 20.2% 84%; /* Значительно светлее */
+    --muted-foreground: 0 0% 100%; /* Чистый белый */
     --accent: 217.2 32.6% 23%;
     --accent-foreground: 0 0% 100%; 
     --destructive: 0 62.8% 65%; /* Более яркий красный */
@@ -82,6 +82,7 @@
   .dark body {
     @apply bg-[#121212]; /* Чуть светлее чем черный */
     background-image: linear-gradient(180deg, rgba(70, 100, 150, 0.1) 0%, rgba(20, 20, 25, 0) 50%);
+    color: #ffffff; /* Чистый белый текст для темной темы */
   }
 }
 
@@ -151,7 +152,7 @@
   }
 
   .dark .ios-search-input::placeholder {
-    @apply text-gray-400; /* Светлее для лучшей видимости */
+    @apply text-white/70; /* Полупрозрачный белый для плейсхолдера */
   }
 
   /* iOS эффект нажатия */
@@ -167,7 +168,7 @@
   }
 
   .dark .ios-spinner:before {
-    @apply border-white/15 border-t-[#64a8ff];
+    @apply border-white/20 border-t-white;
   }
 
   /* iOS детальные элементы */
@@ -220,6 +221,7 @@
 
   .dark .ios-forecast-hour {
     @apply bg-[rgba(50,50,55,0.7)] border-white/15;
+    color: white;
   }
 
   .dark .ios-forecast-hour:active {
@@ -238,6 +240,7 @@
 
   .dark .ios-weekly-day {
     @apply bg-[rgba(50,50,55,0.7)] border-white/15;
+    color: white;
   }
 
   .dark .ios-weekly-day:active {
@@ -270,6 +273,7 @@
   .dark .ios-modal-content {
     @apply bg-[#2a2a30]; /* Светлее для лучшего контраста */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    color: white;
   }
 
   /* iOS кнопка закрытия модального окна */
@@ -318,29 +322,16 @@
     @apply text-[11px] font-medium tracking-wide uppercase;
   }
 
-  /* Улучшенная типографика для темной темы */
+  /* Белый текст для всех типографических элементов в темной теме */
   .dark .ios-text-title1,
-  .dark .ios-text-title2 {
-    @apply font-semibold tracking-tight text-white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  .dark .ios-text-headline {
-    @apply font-medium text-white;
-  }
-
-  .dark .ios-text-subheadline {
-    @apply text-gray-100; /* Почти белый для лучшей читаемости */
-  }
-
+  .dark .ios-text-title2,
+  .dark .ios-text-headline,
+  .dark .ios-text-body,
+  .dark .ios-text-subheadline,
   .dark .ios-text-caption1,
   .dark .ios-text-caption2 {
-    @apply text-gray-300; /* Светло-серый для лучшей читаемости */
-  }
-
-  /* Улучшенная читаемость для вторичного текста */
-  .dark .text-ios-text-secondary {
-    @apply text-gray-300 !important; /* Переопределяем для лучшей видимости */
+    @apply text-white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   /* Стили для безопасной области в iOS */
@@ -369,6 +360,17 @@
   .dark .text-ios-red {
     @apply text-[#ff6b60] !important; /* Более светлый красный для темной темы */
     text-shadow: 0 0 8px rgba(255, 59, 48, 0.3);
+  }
+
+  /* Белый текст для вторичных текстов в темной теме */
+  .dark .text-ios-text-secondary {
+    @apply text-white !important;
+    opacity: 0.85; /* Небольшая прозрачность для визуального разделения от основного текста */
+  }
+
+  .dark .text-ios-text-tertiary {
+    @apply text-white !important;
+    opacity: 0.65; /* Больше прозрачности для третичного текста */
   }
 }
 
@@ -431,16 +433,6 @@
               opacity 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
-/* Дополнительные улучшения для лучшей читаемости */
-@media (prefers-contrast: more) {
-  .dark .ios-detail-item,
-  .dark .ios-tip-item,
-  .dark .ios-forecast-hour,
-  .dark .ios-weekly-day {
-    @apply border-white/30 !important;
-  }
-}
-
 /* Адаптация для планшетов */
 @media (min-width: 768px) {
   .ios-container {
@@ -474,12 +466,6 @@
 .dark .text-[76px] {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   @apply text-[#ffffff];
-}
-
-/* Фиксированная контрастность для вторичного текста */
-.dark .ios-text-secondary, 
-.dark .text-ios-text-secondary {
-  @apply text-gray-300 !important;
 }
 
 /* Улучшение для выпадающих теней в карточках погоды в темном режиме */
