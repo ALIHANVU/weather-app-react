@@ -31,9 +31,9 @@
     --ios-bg: 0 0 0;
     --ios-elevated: 28 28 30;
     --ios-separator: 44 44 46;
-    --ios-text-primary: 255 255 255;
-    --ios-text-secondary: 235 235 245 / 0.6;
-    --ios-text-tertiary: 235 235 245 / 0.4;
+    --ios-text-primary: 255 255 255; /* Белый текст */
+    --ios-text-secondary: 235 235 245 / 0.6; /* Полупрозрачный белый */
+    --ios-text-tertiary: 235 235 245 / 0.4; /* Еще более полупрозрачный белый */
     --ios-blue: 10 132 255;
     --ios-green: 48 209 88;
     --ios-indigo: 94 92 230;
@@ -68,12 +68,14 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "SF Pro", "Helvetica Neue", Arial, sans-serif;
-    @apply bg-[rgb(var(--ios-bg))] text-[rgb(var(--ios-text-primary))];
     line-height: 1.3;
     font-weight: 400;
     letter-spacing: -0.01em;
     min-height: 100%;
     overflow-x: hidden;
+    /* Использование CSS переменных для автоматического переключения цветов */
+    background-color: rgb(var(--ios-bg));
+    color: rgb(var(--ios-text-primary));
   }
 
   /* Улучшенный iOS градиент фона */
@@ -84,6 +86,12 @@
 
   .dark body {
     background-image: linear-gradient(180deg, rgba(40, 60, 100, 0.08) 0%, rgba(0, 0, 0, 0) 50%);
+    color: #ffffff; /* Явное указание белого цвета */
+  }
+  
+  /* Принудительно белый текст для всех элементов в тёмной теме */
+  .dark * {
+    color-scheme: dark;
   }
 }
 
@@ -102,6 +110,7 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 
                 0 0 1px rgba(0, 0, 0, 0.04);
     border: 0.5px solid rgba(255, 255, 255, 0.3);
+    color: rgb(var(--ios-text-primary));
   }
 
   .dark .ios-card {
@@ -109,12 +118,14 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 
                 0 0 1px rgba(255, 255, 255, 0.05);
     border: 0.5px solid rgba(255, 255, 255, 0.08);
+    color: #ffffff; /* Явное указание белого цвета */
   }
 
   /* iOS кнопка */
   .ios-button {
-    @apply text-[rgb(var(--ios-blue))] bg-transparent py-2 px-3.5 font-medium text-base
+    @apply bg-transparent py-2 px-3.5 font-medium text-base
       rounded-full transition-all duration-150;
+    color: rgb(var(--ios-blue));
     min-height: 36px;
   }
 
@@ -124,7 +135,12 @@
   }
 
   .ios-button.ios-filled {
-    @apply bg-[rgb(var(--ios-blue))] text-white;
+    background-color: rgb(var(--ios-blue));
+    color: white;
+  }
+
+  .dark .ios-button {
+    color: rgb(var(--ios-blue)); /* Синий цвет для кнопок в тёмной теме */
   }
 
   /* iOS поисковое поле */
@@ -157,6 +173,14 @@
     color: rgb(var(--ios-text-tertiary));
   }
 
+  .dark .ios-search-input {
+    color: #ffffff; /* Явное указание белого цвета */
+  }
+
+  .dark .ios-search-input::placeholder {
+    color: rgba(255, 255, 255, 0.4); /* Полупрозрачный белый для плейсхолдера */
+  }
+
   /* iOS лоадер */
   .ios-spinner:before {
     content: "";
@@ -172,6 +196,7 @@
       transition-all duration-200;
     background-color: rgba(118, 118, 128, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.2);
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-detail-item:active {
@@ -182,6 +207,7 @@
   .dark .ios-detail-item {
     background-color: rgba(235, 235, 245, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.08);
+    color: #ffffff; /* Явное указание белого цвета */
   }
 
   .dark .ios-detail-item:active {
@@ -194,6 +220,7 @@
       transition-all duration-200 flex items-start;
     background-color: rgba(118, 118, 128, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.2);
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-tip-item:active {
@@ -204,6 +231,7 @@
   .dark .ios-tip-item {
     background-color: rgba(235, 235, 245, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.08);
+    color: #ffffff; /* Явное указание белого цвета */
   }
 
   .dark .ios-tip-item:active {
@@ -216,6 +244,7 @@
       py-2.5 px-2 rounded-xl transition-all duration-200;
     background-color: rgba(118, 118, 128, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.2);
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-forecast-hour:active {
@@ -226,7 +255,7 @@
   .dark .ios-forecast-hour {
     background-color: rgba(235, 235, 245, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: white;
+    color: #ffffff; /* Явное указание белого цвета */
   }
 
   .dark .ios-forecast-hour:active {
@@ -239,6 +268,7 @@
       transition-all duration-200 items-center;
     background-color: rgba(118, 118, 128, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.2);
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-weekly-day:active {
@@ -249,7 +279,7 @@
   .dark .ios-weekly-day {
     background-color: rgba(235, 235, 245, 0.08);
     border: 0.5px solid rgba(255, 255, 255, 0.08);
-    color: white;
+    color: #ffffff; /* Явное указание белого цвета */
   }
 
   .dark .ios-weekly-day:active {
@@ -275,6 +305,7 @@
       overflow-y-auto p-5 shadow-xl translate-y-8 opacity-0
       transition-all duration-300;
     background-color: rgb(var(--ios-elevated));
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-modal.visible .ios-modal-content {
@@ -283,6 +314,7 @@
 
   .dark .ios-modal-content {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    color: #ffffff; /* Явное указание белого цвета */
   }
 
   /* iOS кнопка закрытия модального окна */
@@ -301,7 +333,7 @@
 
   .dark .ios-close-button {
     background-color: rgba(235, 235, 245, 0.2);
-    color: white;
+    color: #ffffff; /* Явное указание белого цвета */
   }
 }
 
@@ -313,6 +345,7 @@
     font-weight: 700;
     letter-spacing: -0.4px;
     line-height: 1.1;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-title1 {
@@ -320,6 +353,7 @@
     font-weight: 600;
     letter-spacing: -0.4px;
     line-height: 1.15;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-title2 {
@@ -327,6 +361,7 @@
     font-weight: 600;
     letter-spacing: -0.3px;
     line-height: 1.2;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-title3 {
@@ -334,6 +369,7 @@
     font-weight: 600;
     letter-spacing: -0.2px;
     line-height: 1.25;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-headline {
@@ -341,6 +377,7 @@
     font-weight: 600;
     letter-spacing: -0.2px;
     line-height: 1.3;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-body {
@@ -348,6 +385,7 @@
     font-weight: 400;
     letter-spacing: -0.2px;
     line-height: 1.3;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-callout {
@@ -355,6 +393,7 @@
     font-weight: 400;
     letter-spacing: -0.2px;
     line-height: 1.3;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-subheadline {
@@ -362,6 +401,7 @@
     font-weight: 400;
     letter-spacing: -0.1px;
     line-height: 1.3;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-footnote {
@@ -369,6 +409,7 @@
     font-weight: 400;
     letter-spacing: 0px;
     line-height: 1.3;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-caption1 {
@@ -376,6 +417,7 @@
     font-weight: 400;
     letter-spacing: 0px;
     line-height: 1.3;
+    color: rgb(var(--ios-text-primary));
   }
 
   .ios-text-caption2 {
@@ -384,6 +426,22 @@
     letter-spacing: 0.6px;
     line-height: 1.3;
     text-transform: uppercase;
+    color: rgb(var(--ios-text-primary));
+  }
+
+  /* Белый текст в темной теме для всех текстовых элементов */
+  .dark .ios-text-largetitle,
+  .dark .ios-text-title1,
+  .dark .ios-text-title2,
+  .dark .ios-text-title3,
+  .dark .ios-text-headline,
+  .dark .ios-text-body,
+  .dark .ios-text-callout,
+  .dark .ios-text-subheadline,
+  .dark .ios-text-footnote,
+  .dark .ios-text-caption1,
+  .dark .ios-text-caption2 {
+    color: #ffffff !important; /* Принудительный белый текст */
   }
 
   /* Автоматические цвета для темной/светлой темы */
@@ -413,6 +471,31 @@
 
   .text-ios-orange {
     color: rgb(var(--ios-orange));
+  }
+
+  /* Принудительно белый цвет для текстовых классов в темной теме */
+  .dark .text-ios-primary {
+    color: #ffffff !important;
+  }
+
+  .dark .text-ios-secondary {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .dark .text-ios-tertiary {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .dark .text-ios-text-primary {
+    color: #ffffff !important;
+  }
+
+  .dark .text-ios-text-secondary {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .dark .text-ios-text-tertiary {
+    color: rgba(255, 255, 255, 0.5) !important;
   }
 
   .bg-ios-fill-quaternary {
@@ -530,8 +613,12 @@
 }
 
 /* Температурный дисплей */
+.text-[76px] {
+  color: rgb(var(--ios-text-primary));
+}
+
 .dark .text-[76px] {
-  color: white;
+  color: #ffffff !important; /* Принудительно белый цвет для температуры */
   text-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -571,4 +658,21 @@
 .ios-haptic:active {
   transform: scale(0.97);
   transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Критически важные переопределения для темной темы */
+.dark {
+  color-scheme: dark;
+  color: #ffffff;
+}
+
+.dark *:not(.text-ios-blue, .text-ios-green, .text-ios-red, .text-ios-orange, .text-ios-teal, .text-ios-yellow, .text-ios-purple, .text-ios-indigo, .text-ios-pink, .ios-button) {
+  color: #ffffff;
+}
+
+/* Глобальное принудительное правило для перезаписи любых специфичных стилей */
+@layer utilities {
+  .dark [class*="text-"]:not(.text-ios-blue, .text-ios-green, .text-ios-red, .text-ios-orange, .text-ios-teal, .text-ios-yellow, .text-ios-purple, .text-ios-indigo, .text-ios-pink) {
+    color: #ffffff !important;
+  }
 }
