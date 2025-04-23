@@ -1,115 +1,161 @@
-// src/components/shared/DarkModeEnforcer.jsx
-
 import { useEffect } from 'react';
 
 /**
- * Компонент, который принудительно применяет стили темной темы ко всем текстовым элементам
- * @param {Object} props 
- * @param {boolean} props.darkMode - Флаг включения темной темы
+ * Современный компонент для обеспечения корректного отображения темной темы
+ * с использованием CSS переменных и системной предпочтительной темы
+ * 
+ * @param {Object} props Свойства компонента
+ * @param {boolean} props.darkMode Флаг включения темной темы
  * @returns {null} Компонент не имеет визуального представления
  */
 const DarkModeEnforcer = ({ darkMode }) => {
+  // Применение темной темы к HTML-элементу
   useEffect(() => {
-    if (!darkMode) return;
-    
-    // Вставляем специальные стили для темной темы
-    const styleEl = document.createElement('style');
-    styleEl.id = 'dark-mode-enforcer';
-    styleEl.textContent = `
-      /* Глобальные правила для всего текста */
-      html.dark * {
-        color: white !important;
-      }
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
       
-      /* Поле ввода */
-      html.dark input, 
-      html.dark textarea,
-      html.dark .ios-search-input,
-      html.dark [contenteditable] {
-        color: white !important;
-      }
+      // Устанавливаем мета-тег для цвета темы в iOS
+      updateMetaThemeColor('#000000');
       
-      /* Фикс для температуры */
-      html.dark .text-\\[76px\\] {
-        color: white !important;
-        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
-      }
+      // Устанавливаем предпочтительную цветовую схему для всех элементов формы
+      setColorScheme('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
       
-      /* Очень важное правило с высоким весом */
-      html.dark [class] {
-        color: white !important;
-      }
+      // Возвращаем оригинальный цвет темы
+      updateMetaThemeColor('#f2f2f6');
       
-      /* Исключения для иконок и цветных элементов */
-      html.dark svg *,
-      html.dark [class*="lucide"] *,
-      html.dark .text-ios-blue,
-      html.dark .text-ios-green,
-      html.dark .text-ios-red,
-      html.dark .text-ios-orange,
-      html.dark .bg-ios-blue,
-      html.dark .bg-ios-red,
-      html.dark .bg-ios-green,
-      html.dark .ios-button[class*="bg-"],
-      html.dark [class*="text-ios-"] {
-        color: inherit !important;
-      }
-      
-      /* Особое правило для цветных кнопок */
-      html.dark .bg-ios-blue {
-        color: white !important;
-      }
-    `;
-    
-    document.head.appendChild(styleEl);
-    
-    // Функция для принудительного применения стилей к элементам
-    const enforceWhiteColorForAllElements = () => {
-      // Особенный случай для заголовка температуры (числа 76px)
-      document.querySelectorAll('.text-\\[76px\\]').forEach(el => {
-        el.style.setProperty('color', 'white', 'important');
-      });
-      
-      // Поиск всех текстовых контейнеров
-      document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div:not([class*="text-ios-"]):not([class*="bg-ios"]), label, .ios-text-title1, .ios-text-title2, .ios-text-headline, .ios-text-body, .ios-text-subheadline, .ios-text-caption1, .ios-text-caption2').forEach(el => {
-        el.style.setProperty('color', 'white', 'important');
-      });
-      
-      // Особый фикс для поля поиска
-      document.querySelectorAll('input.ios-search-input').forEach(el => {
-        el.style.setProperty('color', 'white', 'important');
-      });
-    };
-    
-    // Применяем сразу и после небольшой задержки (для элементов, добавленных после рендеринга)
-    enforceWhiteColorForAllElements();
-    const timerId = setTimeout(enforceWhiteColorForAllElements, 100);
-    
-    // Наблюдатель за изменениями DOM
-    const observer = new MutationObserver(() => {
-      enforceWhiteColorForAllElements();
-    });
-    
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
-    });
+      // Возвращаем светлую цветовую схему
+      setColorScheme('light');
+    }
     
     // Очистка при размонтировании
     return () => {
-      const styleElement = document.getElementById('dark-mode-enforcer');
-      if (styleElement) {
-        styleElement.remove();
-      }
-      clearTimeout(timerId);
-      observer.disconnect();
+      // Мы не удаляем класс dark при размонтировании,
+      // так как это может повлиять на другие компоненты
     };
   }, [darkMode]);
   
-  // Компонент не рендерит никакого UI
+  // Обработка изменений системной темы
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleChange = (event) => {
+      const systemPrefersDark = event.matches;
+      
+      // Если пользователь не переопределил тему вручную,
+      // следуем системным настройкам
+      if (darkMode === systemPrefersDark) {
+        // Применяем нужную тему
+        if (systemPrefersDark) {
+          document.documentElement.classList.add('dark');
+          updateMetaThemeColor('#000000');
+          setColorScheme('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          updateMetaThemeColor('#f2f2f6');
+          setColorScheme('light');
+        }
+      }
+    };
+    
+    // Добавляем слушатель изменений системной темы
+    try {
+      // Современный метод (addListener устарел)
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } catch (e) {
+      // Fallback для старых браузеров
+      mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
+    }
+  }, [darkMode]);
+  
+  // Обеспечиваем применение темы к элементам ввода
+  useEffect(() => {
+    if (!darkMode) return;
+    
+    // Эта функция будет добавлять атрибут data-theme="dark" ко всем
+    // динамически добавляемым элементам ввода
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes.length) {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const inputs = node.querySelectorAll('input, textarea, select');
+              inputs.forEach((input) => {
+                input.setAttribute('data-theme', 'dark');
+              });
+              
+              if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA' || node.tagName === 'SELECT') {
+                node.setAttribute('data-theme', 'dark');
+              }
+            }
+          });
+        }
+      });
+    });
+    
+    // Наблюдаем за всем DOM
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+    
+    // Очистка при размонтировании
+    return () => observer.disconnect();
+  }, [darkMode]);
+  
+  // Компонент не имеет визуального представления
   return null;
 };
+
+/**
+ * Обновляет мета-тег theme-color для изменения цвета UI браузера
+ * 
+ * @param {string} color Цвет в формате HEX
+ */
+function updateMetaThemeColor(color) {
+  // Ищем существующий мета-тег
+  let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  
+  if (!metaThemeColor) {
+    // Если мета-тег не существует, создаем его
+    metaThemeColor = document.createElement('meta');
+    metaThemeColor.name = 'theme-color';
+    document.head.appendChild(metaThemeColor);
+  }
+  
+  // Устанавливаем цвет
+  metaThemeColor.content = color;
+}
+
+/**
+ * Устанавливает предпочтительную цветовую схему для элементов формы
+ * 
+ * @param {string} scheme Цветовая схема ('dark' или 'light')
+ */
+function setColorScheme(scheme) {
+  // Создаем или обновляем стиль для элементов формы
+  let styleElement = document.getElementById('color-scheme-style');
+  
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = 'color-scheme-style';
+    document.head.appendChild(styleElement);
+  }
+  
+  // Устанавливаем правила CSS
+  styleElement.textContent = `
+    input, textarea, select, button {
+      color-scheme: ${scheme};
+    }
+  `;
+  
+  // Также устанавливаем атрибуты для всех существующих элементов ввода
+  document.querySelectorAll('input, textarea, select').forEach((input) => {
+    input.setAttribute('data-theme', scheme);
+  });
+}
 
 export default DarkModeEnforcer;
