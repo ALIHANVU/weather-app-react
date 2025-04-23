@@ -1,0 +1,271 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default light theme variables */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark theme variables matching iOS dark theme */
+    --background: 0 0% 0%;
+    --foreground: 210 40% 98%;
+    --card: 228 7.7% 11.2%;
+    --card-foreground: 210 40% 98%;
+    --popover: 228 7.7% 11.2%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 60.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    font-size: 16px;
+    height: 100%;
+  }
+
+  body {
+    @apply font-sans bg-ios-bg text-ios-text-primary;
+    line-height: 1.3;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    min-height: 100%;
+    background-image: linear-gradient(180deg, rgba(197, 222, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  /* Темная тема */
+  .dark body {
+    @apply bg-black;
+    background-image: linear-gradient(180deg, rgba(50, 80, 120, 0.06) 0%, rgba(0, 0, 0, 0) 50%);
+  }
+}
+
+/* iOS-специфичные компоненты */
+@layer components {
+  /* iOS контейнер */
+  .ios-container {
+    @apply max-w-[540px] mx-auto px-4;
+    animation: fadeIn 0.6s cubic-bezier(0.0, 0.0, 0.2, 1);
+  }
+
+  /* iOS карточка */
+  .ios-card {
+    @apply bg-ios-card-bg rounded-ios-lg shadow-ios-md border border-white/30
+      backdrop-blur-ios-sm bg-opacity-70 transition-all duration-300;
+  }
+
+  .dark .ios-card {
+    @apply border-white/10 bg-[rgba(28,28,30,0.7)];
+  }
+
+  /* iOS кнопка */
+  .ios-button {
+    @apply text-ios-blue bg-transparent py-2 px-3 font-semibold text-base
+      rounded-ios-pill transition-opacity duration-200;
+  }
+
+  .ios-button:active {
+    @apply opacity-60;
+  }
+
+  /* iOS поисковое поле */
+  .ios-search-container {
+    @apply flex items-center bg-ios-fill-tertiary rounded-ios-pill h-9 overflow-hidden
+      transition-all duration-300;
+  }
+
+  .ios-search-container:focus-within {
+    @apply shadow ring-1 ring-ios-blue bg-ios-fill-quaternary;
+  }
+
+  /* iOS поисковое поле текст */
+  .ios-search-input {
+    @apply flex-1 h-9 border-none bg-transparent px-2 text-base
+      text-ios-text-primary focus:outline-none;
+  }
+
+  .ios-search-input::placeholder {
+    @apply text-ios-text-tertiary;
+  }
+
+  /* iOS эффект нажатия */
+  .ios-press-effect {
+    @apply transition-transform duration-150 active:scale-95;
+  }
+
+  /* iOS лоадер */
+  .ios-spinner:before {
+    content: "";
+    @apply w-5 h-5 rounded-full border-2 border-ios-blue/20 border-t-ios-blue
+      animate-spin inline-block;
+  }
+
+  /* iOS детальные элементы */
+  .ios-detail-item {
+    @apply bg-ios-fill-quaternary rounded-ios-md p-3.5 flex flex-col
+      border border-white/15 transition duration-200;
+  }
+
+  .ios-detail-item:active {
+    @apply scale-95 bg-ios-fill-tertiary;
+  }
+
+  /* iOS советы и прогноз */
+  .ios-tip-item {
+    @apply bg-ios-fill-quaternary rounded-ios-md p-3.5
+      border border-white/15 transition duration-200 flex items-start;
+  }
+
+  .ios-tip-item:active {
+    @apply scale-95 bg-ios-fill-tertiary;
+  }
+
+  /* iOS почасовой прогноз */
+  .ios-forecast-hour {
+    @apply flex flex-col items-center justify-center m-0 min-w-[58px] 
+      py-2.5 px-2 rounded-ios-md bg-ios-fill-quaternary border border-white/15
+      transition duration-200;
+  }
+
+  .ios-forecast-hour:active {
+    @apply scale-95 bg-ios-fill-tertiary;
+  }
+
+  /* iOS недельный прогноз день */
+  .ios-weekly-day {
+    @apply grid grid-cols-[2fr_1fr_1fr] bg-ios-fill-quaternary rounded-ios-md p-3.5
+      border border-white/15 transition duration-200 items-center;
+  }
+
+  .ios-weekly-day:active {
+    @apply scale-95 bg-ios-fill-tertiary;
+  }
+
+  /* iOS модальное окно */
+  .ios-modal {
+    @apply fixed inset-0 w-full h-full z-50 bg-black/0 opacity-0 invisible flex
+      justify-center items-center p-4 box-border pointer-events-none transition-all duration-300;
+  }
+
+  .ios-modal.visible {
+    @apply opacity-100 visible pointer-events-auto bg-black/50 backdrop-blur-ios-md;
+  }
+
+  .ios-modal-content {
+    @apply relative bg-white rounded-ios-lg max-w-[520px] w-full max-h-[calc(100vh-40px)]
+      overflow-y-auto p-5 shadow-ios-lg translate-y-8 opacity-0
+      transition-all duration-300;
+  }
+
+  .ios-modal.visible .ios-modal-content {
+    @apply translate-y-0 opacity-100;
+  }
+
+  .dark .ios-modal-content {
+    @apply bg-[#1c1c1e];
+  }
+
+  /* iOS кнопка закрытия модального окна */
+  .ios-close-button {
+    @apply absolute top-2.5 right-2.5 w-7 h-7 rounded-full border-none
+      bg-ios-fill-tertiary text-ios-text-primary flex items-center justify-center
+      z-10 transition-all duration-200;
+  }
+
+  .ios-close-button:active {
+    @apply bg-ios-fill-secondary scale-95;
+  }
+}
+
+/* Вспомогательные утилиты для iOS-стиля */
+@layer utilities {
+  .ios-text-title1 {
+    @apply text-2xl font-semibold tracking-tight;
+  }
+
+  .ios-text-title2 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+
+  .ios-text-headline {
+    @apply text-base font-medium;
+  }
+
+  .ios-text-body {
+    @apply text-base;
+  }
+
+  .ios-text-subheadline {
+    @apply text-sm font-normal;
+  }
+
+  .ios-text-caption1 {
+    @apply text-xs;
+  }
+
+  .ios-text-caption2 {
+    @apply text-[11px] font-medium tracking-wide uppercase;
+  }
+
+  /* Стили для безопасной области в iOS */
+  .ios-safe-top {
+    padding-top: max(env(safe-area-inset-top), 12px);
+  }
+
+  .ios-safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 12px);
+  }
+
+  .ios-safe-left {
+    padding-left: max(env(safe-area-inset-left), 16px);
+  }
+
+  .ios-safe-right {
+    padding-right: max(env(safe-area-inset-right), 16px);
+  }
+}
