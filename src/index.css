@@ -28,26 +28,26 @@
   }
 
   .dark {
-    /* Dark theme variables matching iOS dark theme */
+    /* Улучшенные переменные темной темы для лучшей читаемости */
     --background: 0 0% 0%;
     --foreground: 210 40% 98%;
-    --card: 228 7.7% 11.2%;
-    --card-foreground: 210 40% 98%;
-    --popover: 228 7.7% 11.2%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
+    --card: 228 7.7% 13%; /* Немного светлее для лучшего контраста */
+    --card-foreground: 0 0% 98%; /* Более яркий белый текст */
+    --popover: 228 7.7% 13%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 217.2 91.2% 65%; /* Более яркий синий */
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 60.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --secondary: 217.2 32.6% 20%; /* Немного светлее */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 217.2 32.6% 20%;
+    --muted-foreground: 215 20.2% 75%; /* Светлее для лучшей читаемости */
+    --accent: 217.2 32.6% 20%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 65%; /* Более яркий красный */
+    --destructive-foreground: 0 0% 98%;
+    --border: 217.2 32.6% 22%; /* Светлее границы */
+    --input: 217.2 32.6% 22%;
+    --ring: 224.3 76.3% 55%; /* Более заметное выделение */
   }
 }
 
@@ -81,7 +81,7 @@
   /* Темная тема */
   .dark body {
     @apply bg-black;
-    background-image: linear-gradient(180deg, rgba(50, 80, 120, 0.06) 0%, rgba(0, 0, 0, 0) 50%);
+    background-image: linear-gradient(180deg, rgba(60, 90, 140, 0.08) 0%, rgba(10, 10, 15, 0) 50%);
   }
 }
 
@@ -100,17 +100,22 @@
   }
 
   .dark .ios-card {
-    @apply border-white/10 bg-[rgba(28,28,30,0.7)];
+    @apply border-white/15 bg-[rgba(35,35,40,0.75)];
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   }
 
   /* iOS кнопка */
   .ios-button {
-    @apply text-ios-blue bg-transparent py-2 px-3 font-semibold text-base
+    @apply text-ios-blue bg-transparent py-2 px-3 font-medium text-base
       rounded-ios-pill transition-opacity duration-200;
   }
 
   .ios-button:active {
     @apply opacity-60;
+  }
+
+  .dark .ios-button {
+    @apply text-[#5cabff]; /* Более яркий синий для кнопок */
   }
 
   /* iOS поисковое поле */
@@ -121,6 +126,14 @@
 
   .ios-search-container:focus-within {
     @apply shadow ring-1 ring-ios-blue bg-ios-fill-quaternary;
+  }
+
+  .dark .ios-search-container {
+    @apply bg-[rgba(45,45,50,0.7)] border border-white/15;
+  }
+
+  .dark .ios-search-container:focus-within {
+    @apply bg-[rgba(55,55,60,0.7)] shadow-[0_0_0_1px_rgba(80,150,255,0.6)];
   }
 
   /* iOS поисковое поле текст */
@@ -155,6 +168,15 @@
     @apply scale-95 bg-ios-fill-tertiary;
   }
 
+  .dark .ios-detail-item {
+    @apply bg-[rgba(45,45,50,0.7)] border-white/20;
+    transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  .dark .ios-detail-item:active {
+    @apply bg-[rgba(55,55,60,0.7)];
+  }
+
   /* iOS советы и прогноз */
   .ios-tip-item {
     @apply bg-ios-fill-quaternary rounded-ios-md p-3.5
@@ -163,6 +185,14 @@
 
   .ios-tip-item:active {
     @apply scale-95 bg-ios-fill-tertiary;
+  }
+
+  .dark .ios-tip-item {
+    @apply bg-[rgba(45,45,50,0.7)] border-white/20;
+  }
+
+  .dark .ios-tip-item:active {
+    @apply bg-[rgba(55,55,60,0.7)];
   }
 
   /* iOS почасовой прогноз */
@@ -176,6 +206,14 @@
     @apply scale-95 bg-ios-fill-tertiary;
   }
 
+  .dark .ios-forecast-hour {
+    @apply bg-[rgba(45,45,50,0.7)] border-white/20;
+  }
+
+  .dark .ios-forecast-hour:active {
+    @apply bg-[rgba(55,55,60,0.7)];
+  }
+
   /* iOS недельный прогноз день */
   .ios-weekly-day {
     @apply grid grid-cols-[2fr_1fr_1fr] bg-ios-fill-quaternary rounded-ios-md p-3.5
@@ -184,6 +222,14 @@
 
   .ios-weekly-day:active {
     @apply scale-95 bg-ios-fill-tertiary;
+  }
+
+  .dark .ios-weekly-day {
+    @apply bg-[rgba(45,45,50,0.7)] border-white/20;
+  }
+
+  .dark .ios-weekly-day:active {
+    @apply bg-[rgba(55,55,60,0.7)];
   }
 
   /* iOS модальное окно */
@@ -210,7 +256,8 @@
   }
 
   .dark .ios-modal-content {
-    @apply bg-[#1c1c1e];
+    @apply bg-[#25252a];
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   }
 
   /* iOS кнопка закрытия модального окна */
@@ -255,6 +302,26 @@
     @apply text-[11px] font-medium tracking-wide uppercase;
   }
 
+  /* Улучшенная типографика для темной темы */
+  .dark .ios-text-title1,
+  .dark .ios-text-title2 {
+    @apply font-semibold tracking-tight text-[#f8f8f8];
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .ios-text-headline {
+    @apply font-medium text-[#f0f0f0];
+  }
+
+  .dark .ios-text-subheadline {
+    @apply text-[#e0e0e0];
+  }
+
+  .dark .ios-text-caption1,
+  .dark .ios-text-caption2 {
+    @apply text-[#b8b8b8]; /* Светлее для лучшей читаемости */
+  }
+
   /* Стили для безопасной области в iOS */
   .ios-safe-top {
     padding-top: max(env(safe-area-inset-top), 12px);
@@ -271,9 +338,19 @@
   .ios-safe-right {
     padding-right: max(env(safe-area-inset-right), 16px);
   }
+
+  /* Улучшенные индикаторы экстремальной температуры */
+  .dark svg path[d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"] {
+    filter: drop-shadow(0 1px 2px rgba(255, 0, 0, 0.2));
+  }
+
+  /* Улучшенный текст предупреждений */
+  .dark .text-ios-red {
+    text-shadow: 0 0 8px rgba(255, 59, 48, 0.3);
+  }
 }
 
-/* В конец файла index.css добавьте: */
+/* Скрытие полосы прокрутки */
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -282,4 +359,138 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Улучшенные анимации */
+.ios-card, .ios-detail-item, .ios-tip-item, 
+.ios-forecast-hour, .ios-weekly-day {
+  transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  will-change: transform, opacity;
+}
+
+/* Анимация входа компонентов */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Улучшенные состояния наведения */
+@media (hover: hover) {
+  .ios-button:hover {
+    opacity: 0.85;
+  }
+  
+  .ios-close-button:hover {
+    @apply bg-ios-fill-secondary;
+    transform: scale(1.05);
+  }
+
+  .dark .ios-detail-item:hover,
+  .dark .ios-tip-item:hover,
+  .dark .ios-forecast-hour:hover,
+  .dark .ios-weekly-day:hover {
+    @apply bg-[rgba(55,55,60,0.8)] border-white/25;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Эффект нажатия с физическим ощущением */
+.ios-press-effect:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+  transition: transform 0.15s cubic-bezier(0.4, 0.0, 0.2, 1),
+              opacity 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Дополнительные улучшения для лучшей читаемости при высоком контрасте */
+@media (prefers-contrast: more) {
+  .dark .ios-text-secondary {
+    @apply text-[#b0b0b5] !important;
+  }
+  
+  .dark .ios-detail-item,
+  .dark .ios-tip-item,
+  .dark .ios-forecast-hour,
+  .dark .ios-weekly-day {
+    @apply border-white/30 !important;
+  }
+
+  .dark .ios-text-title1,
+  .dark .ios-text-title2,
+  .dark .ios-text-headline {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Адаптация для планшетов */
+@media (min-width: 768px) {
+  .ios-container {
+    @apply max-w-[640px];
+  }
+
+  .ios-card {
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .ios-card {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Анимация для предупреждений о погоде */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Улучшение контрастности для температуры */
+.dark .text-[76px] {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  @apply text-[#ffffff];
+}
+
+/* Стиль для подчеркивания текущего дня в прогнозе */
+.current-day {
+  position: relative;
+}
+
+.current-day::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  @apply bg-ios-blue rounded-full;
+}
+
+.dark .current-day::after {
+  @apply bg-[#5cabff];
+  box-shadow: 0 0 4px rgba(92, 171, 255, 0.5);
+}
+
+/* Улучшение для выпадающих теней в карточках погоды в темном режиме */
+.dark .ios-card {
+  --shadow-color: 225 50% 3%;
+  --shadow: 
+    0 1px 1px hsl(var(--shadow-color) / 0.1),
+    0 2px 3px hsl(var(--shadow-color) / 0.1), 
+    0 4px 12px hsl(var(--shadow-color) / 0.2),
+    0 8px 20px hsl(var(--shadow-color) / 0.15);
+  box-shadow: var(--shadow);
 }
