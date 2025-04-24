@@ -1,16 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { WeatherProvider } from './contexts/WeatherContext'
 import SearchSection from './components/layout/SearchSection'
-import CurrentWeather from './components/weather/CurrentWeather'
-import HourlyForecast from './components/weather/HourlyForecast'
-import WeatherDetails from './components/weather/WeatherDetails'
-import FarmerTips from './components/weather/FarmerTips'
-import WeeklyForecast from './components/weather/WeeklyForecast'
-import DayModal from './components/layout/DayModal'
-import ErrorNotification from './components/shared/ErrorNotification'
 import LoadingSpinner from './components/shared/LoadingSpinner'
+import ErrorNotification from './components/shared/ErrorNotification'
 import DarkModeEnforcer from './components/shared/DarkModeEnforcer'
 import WeatherIcon from './components/shared/WeatherIcon'
+
+// Ленивая загрузка компонентов
+const CurrentWeather = lazy(() => import('./components/weather/CurrentWeather'));
+const HourlyForecast = lazy(() => import('./components/weather/HourlyForecast'));
+const WeatherDetails = lazy(() => import('./components/weather/WeatherDetails'));
+const FarmerTips = lazy(() => import('./components/weather/FarmerTips'));
+const WeeklyForecast = lazy(() => import('./components/weather/WeeklyForecast'));
+const DayModal = lazy(() => import('./components/layout/DayModal'));
+
+// Компонент для отображения заглушки
+const PlaceholderContent = ({ onLoadMoscow }) => (
+  <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center mt-8 shadow-sm">
+    <div className="flex justify-center mb-4">
+      <WeatherIcon iconCode="01d" size={80} />
+    </div>
+    <h2 className="text-xl font-semibold mb-4">Погода не загружена</h2>
+    <p className="mb-4">Введите название города в поле поиска или нажмите кнопку ниже для загрузки погоды для Москвы.</p>
+    <button 
+      className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-full font-medium transition-colors 
+                active:scale-[0.97] transform-gpu"
+      onClick={onLoadMoscow}
+    >
+      Загрузить для Москвы
+    </button>
+  </div>
+);
 
 // Компонент для отладки
 const DebugInfo = ({ error, isVisible }) => {
@@ -35,6 +55,14 @@ function App() {
   // Состояние для отображения отладочной информации
   const [showDebug, setShowDebug] = useState(false)
 
+  // Функция для загрузки погоды Москвы
+  const loadMoscowWeather = () => {
+    const weatherContext = document.getElementById('root')?.__WEATHER_CONTEXT__;
+    if (weatherContext && weatherContext.loadWeatherData) {
+      weatherContext.loadWeatherData('Москва');
+    }
+  };
+
   // Эффект для определения предпочтений темной темы
   useEffect(() => {
     // Проверяем предпочтения системы по темной теме
@@ -43,10 +71,19 @@ function App() {
 
     // Подписываемся на изменения предпочтений
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    
     const handleChange = (e) => setDarkMode(e.matches)
     
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
+    // Используем правильный API в зависимости от поддержки браузера
+    try {
+      // Современный метод
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    } catch (e) {
+      // Fallback для старых браузеров
+      mediaQuery.addListener(handleChange)
+      return () => mediaQuery.removeListener(handleChange)
+    }
   }, [])
 
   // Применяем класс темной темы к body
@@ -90,60 +127,37 @@ function App() {
       
       <div className="ios-safe-top ios-safe-bottom ios-safe-left ios-safe-right">
         <div className="ios-container py-2">
-          {/* Заголовок удален */}
-          
           {/* Секция поиска */}
           <SearchSection />
 
           {/* Основной контент */}
-          {showWeather ? (
-            <div 
-              id="weatherResult"
-              className="transition-all duration-400 transform"
-              style={{ 
-                opacity: showWeather ? 1 : 0,
-                transform: showWeather ? 'translateY(0)' : 'translateY(10px)'
-              }}
-            >
-              {/* Основная информация о погоде */}
-              <CurrentWeather />
-              
-              {/* Почасовой прогноз */}
-              <HourlyForecast />
-              
-              {/* Советы для фермеров */}
-              <FarmerTips />
-              
-              {/* Детали погоды */}
-              <WeatherDetails />
-              
-              {/* Прогноз на неделю */}
-              <WeeklyForecast />
-            </div>
-          ) : !loading ? (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center mt-8 shadow-sm">
-              <div className="flex justify-center mb-4">
-                <WeatherIcon iconCode="01d" size={80} />
-              </div>
-              <h2 className="text-xl font-semibold mb-4">Погода не загружена</h2>
-              <p className="mb-4">Введите название города в поле поиска или нажмите кнопку ниже для загрузки погоды для Москвы.</p>
-              <button 
-                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-full font-medium transition-colors" 
-                onClick={() => {
-                  const weatherContext = document.getElementById('root')?.__WEATHER_CONTEXT__;
-                  if (weatherContext && weatherContext.loadWeatherData) {
-                    weatherContext.loadWeatherData('Москва');
-                  }
+          <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 dark:bg-gray-800 rounded-2xl mt-4"></div>}>
+            {showWeather ? (
+              <div 
+                id="weatherResult"
+                className="transition-all duration-400 transform will-change-transform"
+                style={{ 
+                  opacity: showWeather ? 1 : 0,
+                  transform: showWeather ? 'translateY(0)' : 'translateY(10px)'
                 }}
               >
-                Загрузить для Москвы
-              </button>
-            </div>
-          ) : null}
+                {/* Основные компоненты для погоды */}
+                <CurrentWeather />
+                <HourlyForecast />
+                <FarmerTips />
+                <WeatherDetails />
+                <WeeklyForecast />
+              </div>
+            ) : !loading ? (
+              <PlaceholderContent onLoadMoscow={loadMoscowWeather} />
+            ) : null}
+          </Suspense>
         </div>
 
         {/* Модальное окно с деталями дня */}
-        <DayModal />
+        <Suspense fallback={null}>
+          <DayModal />
+        </Suspense>
         
         {/* Индикатор загрузки */}
         {loading && <LoadingSpinner />}
