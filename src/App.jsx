@@ -54,6 +54,8 @@ function App() {
   const [loading, setLoading] = useState(false)
   // Состояние для отображения отладочной информации
   const [showDebug, setShowDebug] = useState(false)
+  // Состояние для начальной загрузки приложения
+  const [initialLoading, setInitialLoading] = useState(true)
 
   // Функция для загрузки погоды Москвы
   const loadMoscowWeather = () => {
@@ -62,6 +64,16 @@ function App() {
       weatherContext.loadWeatherData('Москва');
     }
   };
+
+  // Эффект для имитации начальной загрузки приложения
+  useEffect(() => {
+    // Имитируем загрузку приложения
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 1000); // Задержка в 1 секунду для отображения начального спиннера
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Эффект для определения предпочтений темной темы
   useEffect(() => {
@@ -121,54 +133,61 @@ function App() {
   }, []);
 
   return (
-    <WeatherProvider setShowWeather={setShowWeather} setError={setError} setLoading={setLoading}>
-      {/* Добавляем компонент DarkModeEnforcer */}
-      <DarkModeEnforcer darkMode={darkMode} />
+    <>
+      {/* Показываем спиннер начальной загрузки поверх всего */}
+      {initialLoading && (
+        <LoadingSpinner message="Запуск приложения..." />
+      )}
       
-      <div className="ios-safe-top ios-safe-bottom ios-safe-left ios-safe-right">
-        <div className="ios-container py-2">
-          {/* Секция поиска */}
-          <SearchSection />
+      <WeatherProvider setShowWeather={setShowWeather} setError={setError} setLoading={setLoading}>
+        {/* Добавляем компонент DarkModeEnforcer */}
+        <DarkModeEnforcer darkMode={darkMode} />
+        
+        <div className="ios-safe-top ios-safe-bottom ios-safe-left ios-safe-right">
+          <div className="ios-container py-2">
+            {/* Секция поиска */}
+            <SearchSection />
 
-          {/* Основной контент */}
-          <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 dark:bg-gray-800 rounded-2xl mt-4"></div>}>
-            {showWeather ? (
-              <div 
-                id="weatherResult"
-                className="transition-all duration-400 transform will-change-transform"
-                style={{ 
-                  opacity: showWeather ? 1 : 0,
-                  transform: showWeather ? 'translateY(0)' : 'translateY(10px)'
-                }}
-              >
-                {/* Основные компоненты для погоды */}
-                <CurrentWeather />
-                <HourlyForecast />
-                <FarmerTips />
-                <WeatherDetails />
-                <WeeklyForecast />
-              </div>
-            ) : !loading ? (
-              <PlaceholderContent onLoadMoscow={loadMoscowWeather} />
-            ) : null}
+            {/* Основной контент */}
+            <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 dark:bg-gray-800 rounded-2xl mt-4"></div>}>
+              {showWeather ? (
+                <div 
+                  id="weatherResult"
+                  className="transition-all duration-400 transform will-change-transform"
+                  style={{ 
+                    opacity: showWeather ? 1 : 0,
+                    transform: showWeather ? 'translateY(0)' : 'translateY(10px)'
+                  }}
+                >
+                  {/* Основные компоненты для погоды */}
+                  <CurrentWeather />
+                  <HourlyForecast />
+                  <FarmerTips />
+                  <WeatherDetails />
+                  <WeeklyForecast />
+                </div>
+              ) : !loading ? (
+                <PlaceholderContent onLoadMoscow={loadMoscowWeather} />
+              ) : null}
+            </Suspense>
+          </div>
+
+          {/* Модальное окно с деталями дня */}
+          <Suspense fallback={null}>
+            <DayModal />
           </Suspense>
+          
+          {/* Индикатор загрузки - показываем только во время обычной загрузки, не во время начальной */}
+          {loading && !initialLoading && <LoadingSpinner />}
+          
+          {/* Уведомление об ошибке */}
+          {error && <ErrorNotification message={error} onClose={() => setError(null)} />}
+          
+          {/* Отладочная информация */}
+          <DebugInfo error={error} isVisible={showDebug} />
         </div>
-
-        {/* Модальное окно с деталями дня */}
-        <Suspense fallback={null}>
-          <DayModal />
-        </Suspense>
-        
-        {/* Индикатор загрузки */}
-        {loading && <LoadingSpinner />}
-        
-        {/* Уведомление об ошибке */}
-        {error && <ErrorNotification message={error} onClose={() => setError(null)} />}
-        
-        {/* Отладочная информация */}
-        <DebugInfo error={error} isVisible={showDebug} />
-      </div>
-    </WeatherProvider>
+      </WeatherProvider>
+    </>
   )
 }
 
