@@ -13,6 +13,8 @@ const FarmerTips = () => {
   const { weatherData } = useWeather()
   // Состояние для советов
   const [tips, setTips] = useState([])
+  // Состояние для раскрытых советов
+  const [expandedTips, setExpandedTips] = useState({})
   
   // Получаем советы при изменении данных о погоде
   useEffect(() => {
@@ -36,6 +38,14 @@ const FarmerTips = () => {
     
     loadTips()
   }, [weatherData])
+  
+  // Функция для переключения состояния совета
+  const toggleTipExpansion = (index) => {
+    setExpandedTips(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }))
+  }
   
   // Если нет данных или советов, не рендерим компонент
   if (!weatherData || !weatherData.weather || tips.length === 0) return null
@@ -63,7 +73,9 @@ const FarmerTips = () => {
           {tips.map((tip, index) => (
             <motion.div
               key={index}
-              className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex"
+              className={`bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex cursor-pointer 
+                          transition-all duration-300 ease-in-out
+                          ${expandedTips[index] ? 'col-span-2' : ''}`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ 
@@ -71,12 +83,14 @@ const FarmerTips = () => {
                 delay: 0.4 + index * 0.05,
                 ease: "easeOut"
               }}
+              onClick={() => toggleTipExpansion(index)}
             >
               <div className="w-10 h-10 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
                 <span className="text-xl">{tipIcons[index % tipIcons.length]}</span>
               </div>
-              <p className="text-sm font-medium leading-tight">
-                {tip.length > 70 ? `${tip.substring(0, 70)}...` : tip}
+              <p className={`text-sm font-medium leading-tight 
+                            ${expandedTips[index] ? 'line-clamp-none' : 'line-clamp-2'}`}>
+                {tip}
               </p>
             </motion.div>
           ))}
