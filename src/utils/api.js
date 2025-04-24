@@ -1,62 +1,77 @@
-// Таймауты и настройки для запросов
-const CONFIG = {
-  API_REQUEST_TIMEOUT: 10000, // 10 секунд
-  RETRY_DELAY: 1000, // 1 секунда между повторными попытками
-  MAX_RETRIES: 2, // Максимальное количество повторных попыток
-  CACHE_TIME: 60 * 60 * 1000 // 1 час кэширования
+// Таймауты для запросов
+const TIMEOUTS = {
+  API_REQUEST: 10000 // 10 секунд
 }
 
 /**
- * Создает URL с параметрами, избегая проблем с кодированием
- * @param {string} baseUrl - Базовый URL
- * @param {Object} params - Параметры для запроса
- * @returns {string} Сформированный URL
+ * Получает данные о погоде через Vercel API Routes с повторными попытками
+ * @param {string} city - Название города
+ * @param {number} retries - Количество повторных попыток
+ * @returns {Promise<Object>} Данные о погоде
  */
-function createUrl(baseUrl, params = {}) {
-  const url = new URL(baseUrl)
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      url.searchParams.append(key, value)
-    }
-  })
-  return url.toString()
-}
-
-/**
- * Универсальный метод безопасного выполнения fetch-запроса
- * @param {string} url - URL для запроса
- * @param {Object} options - Опции для fetch
- * @returns {Promise<Object>} Данные ответа
- */
-async function safeFetch(url, options = {}) {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_REQUEST_TIMEOUT)
-
+export async function fetchWeatherData(city, retries = 2) {
   try {
-    const response = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        ...options.headers
-      }
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`HTTP Error: ${response.status} - ${errorText}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    clearTimeout(timeoutId)
+    console.log('Запрашиваем погоду для города:', city)
     
-    if (error.name === 'AbortError') {
-      throw new Error('Превышено время ожидания запроса')
+    // Создаем URL для API маршрута
+    // Используем абсолютный путь, начинающийся с /api
+    const apiUrl = `/api/weather?city=${encodeURIComponent(city)}`
+    
+    console.log('Отправляем запрос к API:', apiUrl)
+    
+    // Добавляем таймаут к запросу
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.API_REQUEST);
+    
+    try {
+      // Запрос к нашему API маршруту
+      const response = await fetch(apiUrl, { 
+        signal: controller.signal,
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Ошибка API: ${response.status} - ${errorText}`)
+      }
+      
+      const data = await response.json();
+      
+      // Проверяем структуру данных
+      if (!data || (!data.weather && !data.error)) {
+        throw new Error('Неверный формат данных от API')
+      }
+      
+      // Проверяем наличие ошибки в ответе
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      
+      return data;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      // Проверяем, является ли ошибка отменой из-за таймаута
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Превышено время ожидания запроса');
+      }
+      
+      throw fetchError;
+    }
+  } catch (error) {
+    console.error('Ошибка получения данных о погоде:', error.message)
+    
+    // Повторные попытки с задержкой
+    if (retries > 0) {
+      console.log(`Повторная попытка (осталось ${retries}). Ожидание 1 секунду...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return fetchWeatherData(city, retries - 1);
     }
     
     throw error
@@ -64,106 +79,102 @@ async function safeFetch(url, options = {}) {
 }
 
 /**
- * Получает данные о погоде через API с расширенной обработкой ошибок
- * @param {string} city - Название города
- * @param {Object} [fetchOptions={}] - Дополнительные опции для запроса
- * @returns {Promise<Object>} Данные о погоде
- */
-export async function fetchWeatherData(city, fetchOptions = {}) {
-  const options = {
-    retries: CONFIG.MAX_RETRIES,
-    ...fetchOptions
-  }
-
-  const url = createUrl('/api/weather', { city })
-
-  // Последовательность попыток с экспоненциальной задержкой
-  for (let attempt = 0; attempt <= options.retries; attempt++) {
-    try {
-      const data = await safeFetch(url, {
-        signal: options.signal
-      })
-
-      // Расширенная валидация данных
-      if (!data || (!data.weather && !data.forecast)) {
-        throw new Error('Неверный формат данных от API')
-      }
-
-      return data
-    } catch (error) {
-      // Последняя попытка - выбрасываем ошибку
-      if (attempt === options.retries) {
-        console.error('Критическая ошибка получения погоды:', error)
-        throw error
-      }
-
-      // Логирование и экспоненциальная задержка
-      console.warn(`Попытка ${attempt + 1}: ${error.message}`)
-      await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY * (2 ** attempt)))
-    }
-  }
-}
-
-/**
- * Загружает советы для фермеров с расширенной обработкой
+ * Загружает советы для фермеров с механизмом повторных попыток
  * @returns {Promise<Object>} Советы
  */
-export async function loadFarmerTips() {
-  const timestamp = Date.now()
-
+export async function loadFarmerTips(retries = 2) {
   try {
-    const response = await safeFetch(`/farmer-tips.json?${timestamp}`)
-    return response
+    // Добавляем параметр с временем для предотвращения кеширования
+    const timestamp = new Date().getTime()
+    
+    // Устанавливаем таймаут
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.API_REQUEST);
+    
+    try {
+      const response = await fetch(`/farmer-tips.json?${timestamp}`, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      return data
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      // Проверяем, является ли ошибка отменой из-за таймаута
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Превышено время ожидания запроса');
+      }
+      
+      throw fetchError;
+    }
   } catch (error) {
     console.warn('Ошибка загрузки советов:', error.message)
-
-    // Резервные советы с расширенной структурой
+    
+    // Повторные попытки с задержкой
+    if (retries > 0) {
+      console.log(`Повторная попытка загрузки советов (осталось ${retries}). Ожидание 1 секунду...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return loadFarmerTips(retries - 1);
+    }
+    
+    // Резервные советы, если сервер недоступен
     return {
-      temperature: {
-        hot: {
-          tips: [
-            "Полив в ранние утренние или поздние вечерние часы",
-            "Защита растений от перегрева",
-            "Мульчирование для сохранения влаги"
-          ]
+      "temperature": {
+        "hot": {
+          "min": 25,
+          "tips": ["Поливайте растения рано утром или вечером", "Используйте мульчу для удержания влаги"]
         },
-        moderate: {
-          tips: [
-            "Оптимальный период для agricultural работ",
-            "Плановый осмотр растений",
-            "Профилактика болезней"
-          ]
+        "moderate": {
+          "min": 15,
+          "max": 24,
+          "tips": ["Идеальное время для обрезки растений", "Проверьте наличие вредителей на растениях"]
         },
-        cold: {
-          tips: [
-            "Защита от заморозков",
-            "Ограничение полива",
-            "Укрытие чувствительных культур"
-          ]
+        "cold": {
+          "max": 14,
+          "tips": ["Защитите растения от заморозков", "Ограничьте полив в холодную погоду"]
         }
       },
-      humidity: {
-        high: { tips: ["Контроль грибковых заболеваний"] },
-        normal: { tips: ["Стандартный уход за растениями"] },
-        low: { tips: ["Увеличение частоты полива"] }
+      "humidity": {
+        "high": {
+          "min": 70,
+          "tips": ["Следите за появлением грибковых заболеваний", "Обеспечьте хорошую вентиляцию растений"]
+        },
+        "normal": {
+          "min": 40,
+          "max": 69,
+          "tips": ["Поддерживайте регулярный полив", "Проверьте влажность почвы перед поливом"]
+        },
+        "low": {
+          "max": 39,
+          "tips": ["Увеличьте частоту полива", "Используйте системы капельного орошения"]
+        }
+      },
+      "seasons": {
+        "spring": {
+          "tips": ["Подготовьте грядки к посадке", "Начните высаживать холодостойкие культуры"]
+        },
+        "summer": {
+          "tips": ["Защитите растения от перегрева", "Собирайте урожай регулярно"]
+        },
+        "autumn": {
+          "tips": ["Подготовьте сад к зиме", "Время для посадки озимых культур"]
+        },
+        "winter": {
+          "tips": ["Защитите многолетние растения от мороза", "Планируйте посадки на следующий сезон"]
+        }
       }
     }
-  }
-}
-
-// Дополнительные утилиты для обработки данных
-export const apiUtils = {
-  /**
-   * Безопасное извлечение данных с fallback
-   * @param {Object} data - Исходные данные
-   * @param {string} path - Путь к свойству
-   * @param {*} defaultValue - Значение по умолчанию
-   * @returns {*} Извлеченное значение
-   */
-  safeGet: (data, path, defaultValue = null) => {
-    return path.split('.').reduce(
-      (acc, part) => acc && acc[part] !== undefined ? acc[part] : defaultValue, 
-      data
-    )
   }
 }
