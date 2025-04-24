@@ -1,4 +1,4 @@
-// Обновленная версия FarmerTips.jsx с тематическими иконками
+// Обновленная версия FarmerTips.jsx с тематическими иконками и многоточием для обрезанного текста
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -188,7 +188,7 @@ const FarmerTips = () => {
                   <div className="w-10 h-10 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
                     <span className="text-xl">{icon}</span>
                   </div>
-                  <p className="text-sm font-medium leading-tight line-clamp-2">
+                  <p className="text-sm font-medium leading-tight line-clamp-2 overflow-hidden text-ellipsis">
                     {tip}
                   </p>
                 </motion.div>
