@@ -8,26 +8,29 @@ import WeatherIcon from '../shared/WeatherIcon'
  * Оптимизированный компонент элемента прогноза на день
  */
 const DayItem = memo(({ day, index, isAnimating, onClick }) => {
-  // Мемоизируем вычисления температуры
-  const avgTemp = useMemo(() => 
-    Math.round(day.temps.reduce((a, b) => a + b, 0) / day.temps.length), 
-    [day.temps]
-  )
+  // Рассчитываем среднюю температуру
+  const avgTemp = Math.round(day.temps.reduce((a, b) => a + b, 0) / day.temps.length)
   
-  // Мемоизируем определение наиболее частой иконки
-  const mostFrequentIcon = useMemo(() => {
-    if (!day.weather || day.weather.length === 0) return "01d"
+  // Определяем наиболее частую иконку погоды
+  let mostFrequentIcon = "01d"
+  if (day.weather && day.weather.length > 0) {
+    const iconCounts = {}
+    day.weather.forEach(icon => {
+      if (!iconCounts[icon]) {
+        iconCounts[icon] = 0
+      }
+      iconCounts[icon]++
+    })
     
-    const iconCounts = day.weather.reduce((counts, icon) => {
-      counts[icon] = (counts[icon] || 0) + 1
-      return counts
-    }, {})
-
-    return Object.entries(iconCounts).reduce((a, b) => 
-      b[1] > a[1] ? b : a
-    )[0]
-  }, [day.weather])
-
+    let maxCount = 0
+    Object.entries(iconCounts).forEach(([icon, count]) => {
+      if (count > maxCount) {
+        maxCount = count
+        mostFrequentIcon = icon
+      }
+    })
+  }
+  
   return (
     <motion.div
       key={day.date}
@@ -44,11 +47,6 @@ const DayItem = memo(({ day, index, isAnimating, onClick }) => {
         ease: "easeOut"
       }}
       onClick={onClick}
-      // Оптимизация производительности
-      style={{ 
-        willChange: 'transform, opacity',
-        contain: 'layout paint style'
-      }}
       whileHover={{
         x: 2,
         transition: { duration: 0.2 }
@@ -64,22 +62,13 @@ const DayItem = memo(({ day, index, isAnimating, onClick }) => {
       
       <div className="flex items-center">
         <div className="mr-4">
-          <WeatherIcon 
-            iconCode={mostFrequentIcon} 
-            size={38} 
-          />
+          <WeatherIcon iconCode={mostFrequentIcon} size={38} />
         </div>
         <div className="text-base font-bold w-12 text-right">
           {avgTemp}°C
         </div>
       </div>
     </motion.div>
-  )
-}, (prevProps, nextProps) => {
-  // Глубокое сравнение только важных пропсов
-  return (
-    prevProps.day.date === nextProps.day.date &&
-    prevProps.isAnimating === nextProps.isAnimating
   )
 })
 
@@ -92,7 +81,7 @@ const WeeklyForecast = memo(() => {
   // Получаем данные о погоде и функцию открытия модального окна из контекста
   const { weatherData, openDayModal, isAnimating } = useWeather()
   
-  // Группируем прогноз по дням с мемоизацией
+  // Группируем прогноз по дням и используем useMemo для оптимизации
   const dailyForecast = useMemo(() => {
     if (!weatherData || !weatherData.forecast) return []
     
@@ -117,23 +106,10 @@ const WeeklyForecast = memo(() => {
         ease: [0.175, 0.885, 0.32, 1.275]
       }}
       layoutId="weekly-forecast-card"
-      // Оптимизация производительности
-      style={{ 
-        willChange: 'transform, opacity',
-        contain: 'layout paint style'
-      }}
     >
       <h2 className="text-xl font-semibold mb-4">Прогноз на 7 дней</h2>
       
-      <div 
-        className="flex flex-col"
-        // Оптимизация списка
-        style={{ 
-          willChange: 'contents', 
-          containIntrinsicSize: 'block',
-          contain: 'layout style'
-        }}
-      >
+      <div className="flex flex-col">
         {dailyForecast.map((day, index) => (
           <DayItem 
             key={day.date}
