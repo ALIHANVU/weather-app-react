@@ -322,7 +322,7 @@ h1, h2, h3, h4, h5, h6, p, span, div {
   color: var(--ios-text-tertiary);
 }
 
-/* iOS модальное окно */
+/* iOS модальное окно - ИСПРАВЛЕНО */
 .ios-modal {
   position: fixed;
   inset: 0;
@@ -330,8 +330,8 @@ h1, h2, h3, h4, h5, h6, p, span, div {
   height: 100%;
   z-index: 50;
   opacity: 0;
-  visibility: hidden;
-  display: flex;
+  /* Заменено visibility: hidden на display: none для решения циклической зависимости */
+  display: none;
   justify-content: center;
   align-items: center;
   padding: 16px;
@@ -342,7 +342,8 @@ h1, h2, h3, h4, h5, h6, p, span, div {
 
 .ios-modal.visible {
   opacity: 1;
-  visibility: visible;
+  /* Заменено visibility: visible на display: flex */
+  display: flex;
   pointer-events: auto;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
@@ -524,6 +525,7 @@ html.dark .text-\[76px\] {
     scroll-behavior: auto !important;
   }
 }
+
 /* Стили для погодных иконок */
 .ios-weather-icon {
   display: inline-flex;
