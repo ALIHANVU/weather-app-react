@@ -27,27 +27,35 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
   const [isAnimating, setIsAnimating] = useState(false)
   // Референс для отслеживания был ли монтирован компонент
   const isMounted = useRef(false)
-  
+  // Контроллер для отмены запросов
+  const abortControllerRef = useRef(null)
+
   // Мемоизированная функция для задержки обновления состояния с анимацией
   const animateStateChange = useCallback((newData, newCity) => {
     setIsAnimating(true)
     
     // Применение новых данных с задержкой для плавного перехода
-    // Сначала исчезает текущий контент, затем появляется новый
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       setWeatherData(newData)
       setCurrentCity(newCity)
       
       // Даем время для первичного рендера новых компонентов 
-      // перед запуском анимации входа
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         setIsAnimating(false)
-      }, 50)
-    }, 150)
+      })
+    })
   }, [])
   
-  // Загрузка данных о погоде с защитой от частых вызовов
+  // Загрузка данных о погоде с расширенной защитой от частых вызовов
   const loadWeatherData = useCallback(async (city, force = false) => {
+    // Отменяем предыдущий запрос
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    
+    // Создаем новый контроллер для отмены
+    abortControllerRef.current = new AbortController()
+    
     // Проверяем, прошло ли достаточно времени с последней попытки для одного и того же города
     const now = Date.now()
     if (
@@ -66,18 +74,18 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
     
     try {
       // Пробуем загрузить данные через API-функцию
-      const data = await fetchWeatherData(city)
+      const data = await fetchWeatherData(city, { 
+        signal: abortControllerRef.current.signal 
+      })
       
       if (!data || !data.weather || !data.forecast) {
         throw new Error('Получены неполные данные о погоде')
       }
       
-      // Обновляем состояние успешными данными с анимацией
+      // Обновляем состояние с анимацией
       if (weatherData) {
-        // Если уже есть данные - используем плавный переход
         animateStateChange(data, city)
       } else {
-        // При первой загрузке не анимируем
         setWeatherData(data)
         setCurrentCity(city)
       }
@@ -92,55 +100,60 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
       
       console.log(`Данные о погоде для ${city} загружены успешно`)
     } catch (error) {
-      console.error('Ошибка загрузки данных о погоде:', error.message)
-      
-      // Проверяем кеш при ошибке
-      const cached = getCachedWeatherData()
-      if (cached) {
-        console.log('Загружаем данные из кеша')
+      // Обработка ошибок с сохранением предыдущих данных
+      if (error.name !== 'AbortError') {
+        console.error('Ошибка загрузки данных о погоде:', error.message)
         
-        if (weatherData) {
-          // Используем плавный переход для кешированных данных
-          animateStateChange(cached.data, cached.city)
+        const cached = getCachedWeatherData()
+        if (cached) {
+          console.log('Загружаем данные из кеша')
+          
+          if (weatherData) {
+            animateStateChange(cached.data, cached.city)
+          } else {
+            setWeatherData(cached.data)
+            setCurrentCity(cached.city)
+          }
+          
+          setShowWeather(true)
+          setError(`Не удалось обновить данные погоды. Отображены сохраненные данные.`)
         } else {
-          // При первой загрузке не анимируем
-          setWeatherData(cached.data)
-          setCurrentCity(cached.city)
-        }
-        
-        setShowWeather(true)
-        setError(`Не удалось обновить данные погоды. Отображены сохраненные данные.`)
-      } else {
-        // Если нет кеша, показываем заглушку
-        const fallbackData = {
-          weather: {
-            name: city || 'Москва',
-            main: { temp: 15, feels_like: 14, temp_max: 17, temp_min: 13, humidity: 70 },
-            weather: [{ description: 'данные недоступны', icon: '01d' }],
-            wind: { speed: 2.5 },
-            visibility: 10000
-          },
-          forecast: {
-            list: Array(8).fill().map((_, index) => ({
-              dt: Math.floor(Date.now() / 1000) + index * 3600,
-              main: { temp: 15 - index % 3, humidity: 70, feels_like: 14 },
-              weather: [{ icon: '01d' }],
+          // Резервный сценарий с минимальными данными
+          const fallbackData = {
+            weather: {
+              name: city || 'Москва',
+              main: { 
+                temp: 15, 
+                feels_like: 14, 
+                temp_max: 17, 
+                temp_min: 13, 
+                humidity: 70 
+              },
+              weather: [{ description: 'данные недоступны', icon: '01d' }],
               wind: { speed: 2.5 },
               visibility: 10000
-            }))
+            },
+            forecast: {
+              list: Array(8).fill().map((_, index) => ({
+                dt: Math.floor(Date.now() / 1000) + index * 3600,
+                main: { temp: 15 - index % 3, humidity: 70, feels_like: 14 },
+                weather: [{ icon: '01d' }],
+                wind: { speed: 2.5 },
+                visibility: 10000
+              }))
+            }
           }
+          
+          if (weatherData) {
+            animateStateChange(fallbackData, city || 'Москва')
+          } else {
+            setWeatherData(fallbackData)
+            setCurrentCity(city || 'Москва')
+          }
+          
+          setShowWeather(true)
+          setError(`Не удалось загрузить данные о погоде для "${city}". Проверьте подключение к интернету.`)
         }
-        
-        // Устанавливаем заглушку с анимацией, если уже были данные
-        if (weatherData) {
-          animateStateChange(fallbackData, city || 'Москва')
-        } else {
-          setWeatherData(fallbackData)
-          setCurrentCity(city || 'Москва')
-        }
-        
-        setShowWeather(true)
-        setError(`Не удалось загрузить данные о погоде для "${city}". Проверьте подключение к интернету.`)
       }
     } finally {
       // Завершаем начальную загрузку
@@ -175,21 +188,8 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
     }
   }, [loadWeatherData])
 
-  // Экспортируем контекст для отладки
-  useEffect(() => {
-    if (typeof document !== 'undefined' && document.getElementById('root')) {
-      document.getElementById('root').__WEATHER_CONTEXT__ = {
-        loadWeatherData,
-        weatherData,
-        currentCity,
-        isAnimating
-      }
-    }
-  }, [loadWeatherData, weatherData, currentCity, isAnimating])
-
   // Загрузка стартовых данных
   useEffect(() => {
-    // Проверяем, что компонент монтируется впервые
     if (!isMounted.current) {
       isMounted.current = true
       
@@ -279,10 +279,9 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
     setSelectedDayData(dayData)
     
     // Добавляем небольшую задержку перед открытием модального окна
-    // для более плавного переключения
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       setModalVisible(true)
-    }, 50)
+    })
   }, [])
 
   // Закрытие модального окна
@@ -290,10 +289,9 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
     setModalVisible(false)
     
     // Очищаем данные выбранного дня после закрытия модального окна
-    // с дополнительной задержкой для плавной анимации
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       setSelectedDayData(null)
-    }, 300) // Задержка для анимации закрытия
+    })
   }, [])
 
   // Мемоизируем контекстное значение для предотвращения ненужных перерисовок
