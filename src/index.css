@@ -680,3 +680,17 @@ html.dark .ios-weather-icon {
   word-break: break-word;
   hyphens: auto;
 }
+/* Добавим GPU-аппаратное ускорение */
+.will-change-transform {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Оптимизация анимаций */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
