@@ -1,4 +1,279 @@
-@tailwind base;
+/* Продолжение стилей из предыдущего файла */
+
+.ios-modal-content {
+  position: relative;
+  border-radius: var(--ios-radius-lg);
+  max-width: 520px;
+  width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 20px;
+  box-shadow: var(--ios-shadow-lg);
+  transform: translateY(32px);
+  opacity: 0;
+  transition: all var(--ios-animation-duration) var(--ios-animation-easing);
+  background-color: var(--ios-card-bg);
+  color: var(--ios-text-primary);
+}
+
+.ios-modal.visible .ios-modal-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Детальные элементы */
+.ios-detail-item, 
+.ios-tip-item, 
+.ios-forecast-hour, 
+.ios-weekly-day {
+  background-color: var(--ios-fill-quaternary);
+  border-radius: var(--ios-radius-md);
+  padding: 14px;
+  transition: all 0.2s ease;
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  color: var(--ios-text-primary);
+}
+
+html.dark .ios-detail-item, 
+html.dark .ios-tip-item, 
+html.dark .ios-forecast-hour, 
+html.dark .ios-weekly-day {
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.ios-forecast-hour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 6px;
+  min-width: 58px;
+  padding: 10px 8px;
+}
+
+.ios-weekly-day {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: center;
+}
+
+.ios-tip-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Специфичные стили для температуры */
+.text-\[76px\] {
+  color: var(--ios-text-primary);
+}
+
+html.dark .text-\[76px\] {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* iOS Close Button */
+.ios-close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ios-fill-tertiary);
+  border: none;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* iOS Spinner */
+.ios-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 122, 255, 0.2);
+  border-top-color: var(--ios-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Анимации */
+@keyframes ios-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hoverable состояния */
+@media (hover: hover) {
+  .ios-button:hover {
+    opacity: 0.85;
+  }
+  
+  .ios-detail-item:hover,
+  .ios-tip-item:hover,
+  .ios-forecast-hour:hover,
+  .ios-weekly-day:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--ios-shadow-sm);
+  }
+}
+
+/* Утилиты */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Безопасные области */
+.ios-safe-top {
+  padding-top: var(--ios-safe-top);
+}
+
+.ios-safe-bottom {
+  padding-bottom: var(--ios-safe-bottom);
+}
+
+.ios-safe-left {
+  padding-left: var(--ios-safe-left);
+}
+
+.ios-safe-right {
+  padding-right: var(--ios-safe-right);
+}
+
+/* Медиа запросы */
+@media screen and (min-width: 768px) {
+  .ios-container {
+    max-width: 640px;
+  }
+}
+
+@media (prefers-reduced-motion) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Стили для погодных иконок */
+.ios-weather-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.2s ease;
+}
+
+.ios-weather-icon svg {
+  overflow: visible;
+}
+
+html.dark .ios-weather-icon {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
+}
+
+/* Эффект наведения для иконок */
+@media (hover: hover) {
+  .ios-weather-icon:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Анимации для погодных эффектов */
+@keyframes rain-drop {
+  0% { transform: translateY(0); opacity: 0.8; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(10px); opacity: 0; }
+}
+
+@keyframes sun-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes snow-fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(10px) rotate(10deg); }
+}
+
+@keyframes cloud-float {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-rain line {
+  animation: rain-drop 1.5s infinite linear;
+}
+
+.animate-sun circle:first-child {
+  animation: sun-pulse 3s infinite ease-in-out;
+}
+
+.animate-snow circle {
+  animation: snow-fall 3s infinite ease-in-out;
+}
+
+.animate-cloud path {
+  animation: cloud-float 5s infinite ease-in-out;
+}
+
+/* Цвета для градиентов погодных карточек */
+.bg-gradient-sunny {
+  background: linear-gradient(to bottom, #4da0ff, #87bfff);
+}
+
+.bg-gradient-cloudy {
+  background: linear-gradient(to bottom, #8e9eab, #eef2f3);
+}
+
+.bg-gradient-rainy {
+  background: linear-gradient(to bottom, #616161, #9bc5c3);
+}
+
+.bg-gradient-storm {
+  background: linear-gradient(to bottom, #373b44, #4286f4);
+}
+
+.bg-gradient-snow {
+  background: linear-gradient(to bottom, #e6dada, #274046);
+}
+
+.bg-gradient-night {
+  background: linear-gradient(to bottom, #141e30, #243b55);
+}
+
+/* Line-clamp утилиты */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -369,248 +644,3 @@ h1, h2, h3, h4, h5, h6, p, span, div {
 .ios-modal.visible .ios-modal-content {
   transform: translateY(0);
   opacity: 1;
-}
-
-/* Детальные элементы */
-.ios-detail-item, 
-.ios-tip-item, 
-.ios-forecast-hour, 
-.ios-weekly-day {
-  background-color: var(--ios-fill-quaternary);
-  border-radius: var(--ios-radius-md);
-  padding: 14px;
-  transition: all 0.2s ease;
-  border: 0.5px solid rgba(255, 255, 255, 0.2);
-  color: var(--ios-text-primary);
-}
-
-html.dark .ios-detail-item, 
-html.dark .ios-tip-item, 
-html.dark .ios-forecast-hour, 
-html.dark .ios-weekly-day {
-  border: 0.5px solid rgba(255, 255, 255, 0.08);
-}
-
-.ios-forecast-hour {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0 6px;
-  min-width: 58px;
-  padding: 10px 8px;
-}
-
-.ios-weekly-day {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  align-items: center;
-}
-
-.ios-tip-item {
-  display: flex;
-  align-items: flex-start;
-}
-
-/* Специфичные стили для температуры */
-.text-\[76px\] {
-  color: var(--ios-text-primary);
-}
-
-html.dark .text-\[76px\] {
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* iOS Close Button */
-.ios-close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--ios-fill-tertiary);
-  border: none;
-  cursor: pointer;
-  z-index: 5;
-}
-
-/* iOS Spinner */
-.ios-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(0, 122, 255, 0.2);
-  border-top-color: var(--ios-blue);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Анимации */
-@keyframes ios-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Hoverable состояния */
-@media (hover: hover) {
-  .ios-button:hover {
-    opacity: 0.85;
-  }
-  
-  .ios-detail-item:hover,
-  .ios-tip-item:hover,
-  .ios-forecast-hour:hover,
-  .ios-weekly-day:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--ios-shadow-sm);
-  }
-}
-
-/* Утилиты */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Безопасные области */
-.ios-safe-top {
-  padding-top: var(--ios-safe-top);
-}
-
-.ios-safe-bottom {
-  padding-bottom: var(--ios-safe-bottom);
-}
-
-.ios-safe-left {
-  padding-left: var(--ios-safe-left);
-}
-
-.ios-safe-right {
-  padding-right: var(--ios-safe-right);
-}
-
-/* Медиа запросы */
-@media screen and (min-width: 768px) {
-  .ios-container {
-    max-width: 640px;
-  }
-}
-
-@media (prefers-reduced-motion) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Стили для погодных иконок */
-.ios-weather-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  transition: transform 0.2s ease;
-}
-
-.ios-weather-icon svg {
-  overflow: visible;
-}
-
-html.dark .ios-weather-icon {
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
-}
-
-/* Эффект наведения для иконок */
-@media (hover: hover) {
-  .ios-weather-icon:hover {
-    transform: scale(1.05);
-  }
-}
-
-/* Анимации для погодных эффектов */
-@keyframes rain-drop {
-  0% { transform: translateY(0); opacity: 0.8; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(10px); opacity: 0; }
-}
-
-@keyframes sun-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-@keyframes snow-fall {
-  0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(10px) rotate(10deg); }
-}
-
-@keyframes cloud-float {
-  0% { transform: translateX(0); }
-  50% { transform: translateX(2px); }
-  100% { transform: translateX(0); }
-}
-
-.animate-rain line {
-  animation: rain-drop 1.5s infinite linear;
-}
-
-.animate-sun circle:first-child {
-  animation: sun-pulse 3s infinite ease-in-out;
-}
-
-.animate-snow circle {
-  animation: snow-fall 3s infinite ease-in-out;
-}
-
-.animate-cloud path {
-  animation: cloud-float 5s infinite ease-in-out;
-}
-
-/* Цвета для градиентов погодных карточек */
-.bg-gradient-sunny {
-  background: linear-gradient(to bottom, #4da0ff, #87bfff);
-}
-
-.bg-gradient-cloudy {
-  background: linear-gradient(to bottom, #8e9eab, #eef2f3);
-}
-
-.bg-gradient-rainy {
-  background: linear-gradient(to bottom, #616161, #9bc5c3);
-}
-
-.bg-gradient-storm {
-  background: linear-gradient(to bottom, #373b44, #4286f4);
-}
-
-.bg-gradient-snow {
-  background: linear-gradient(to bottom, #e6dada, #274046);
-}
-
-.bg-gradient-night {
-  background: linear-gradient(to bottom, #141e30, #243b55);
-}
