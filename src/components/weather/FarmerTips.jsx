@@ -1,6 +1,4 @@
-// Обновленная версия FarmerTips.jsx с тематическими иконками и многоточием для обрезанного текста
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useWeather from '../../hooks/useWeather'
 import { generateFarmerTips } from '../../utils/weatherUtils'
@@ -114,13 +112,55 @@ const getTipIcon = (tip) => {
 };
 
 /**
- * Компонент советов для фермеров в новом стиле iOS с тематическими иконками
- * 
- * @returns {JSX.Element}
+ * Оптимизированный элемент совета
  */
-const FarmerTips = () => {
+const TipItem = memo(({ tip, index, onClick, isAnimating }) => {
+  // Получаем подходящую иконку для совета
+  const icon = getTipIcon(tip);
+  
+  return (
+    <motion.div
+      key={index}
+      className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex cursor-pointer will-change-transform"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ 
+        opacity: isAnimating ? 0 : 1, 
+        scale: isAnimating ? 0.9 : 1 
+      }}
+      transition={{ 
+        duration: 0.3,
+        delay: 0.4 + index * 0.05,
+        ease: "easeOut"
+      }}
+      onClick={onClick}
+      whileHover={{
+        y: -2,
+        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        transition: { duration: 0.2 }
+      }}
+      whileTap={{
+        scale: 0.97,
+        transition: { duration: 0.1 }
+      }}
+    >
+      <div className="w-10 h-10 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
+        <span className="text-xl">{icon}</span>
+      </div>
+      <p className="text-sm font-medium leading-tight line-clamp-2 overflow-hidden text-ellipsis">
+        {tip}
+      </p>
+    </motion.div>
+  )
+})
+
+TipItem.displayName = 'TipItem'
+
+/**
+ * Компонент советов для фермеров с оптимизированной производительностью
+ */
+const FarmerTips = memo(() => {
   // Получаем данные о погоде из контекста
-  const { weatherData } = useWeather()
+  const { weatherData, isAnimating } = useWeather()
   // Состояние для советов
   const [tips, setTips] = useState([])
   // Состояние для выбранного совета
@@ -128,25 +168,40 @@ const FarmerTips = () => {
   
   // Получаем советы при изменении данных о погоде
   useEffect(() => {
+    let isMounted = true;
+    
     // Асинхронная функция для загрузки советов
     const loadTips = async () => {
       if (!weatherData || !weatherData.weather) return
       
       try {
         const generatedTips = await generateFarmerTips(weatherData.weather)
-        setTips(generatedTips.slice(0, 4)) // Ограничиваем до 4 советов для лучшего отображения
+        
+        // Проверяем, что компонент все еще смонтирован
+        if (isMounted) {
+          setTips(generatedTips.slice(0, 4)) // Ограничиваем до 4 советов
+        }
       } catch (error) {
         console.error('Ошибка при загрузке советов:', error)
-        setTips([
-          'Поливайте растения в соответствии с погодными условиями',
-          'Следите за состоянием почвы',
-          'Защищайте растения от экстремальных погодных условий',
-          'Проверяйте прогноз погоды перед планированием работ'
-        ])
+        
+        // Добавляем резервные советы при ошибке
+        if (isMounted) {
+          setTips([
+            'Поливайте растения в соответствии с погодными условиями',
+            'Следите за состоянием почвы',
+            'Защищайте растения от экстремальных погодных условий',
+            'Проверяйте прогноз погоды перед планированием работ'
+          ])
+        }
       }
     }
     
-    loadTips()
+    loadTips();
+    
+    // Очистка при размонтировании
+    return () => {
+      isMounted = false;
+    };
   }, [weatherData])
   
   // Если нет данных или советов, не рендерим компонент
@@ -155,45 +210,32 @@ const FarmerTips = () => {
   return (
     <>
       <motion.div
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4 will-change-transform"
         initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={{ 
+          opacity: isAnimating ? 0 : 1, 
+          y: isAnimating ? 20 : 0 
+        }}
         transition={{ 
           duration: 0.4,
           delay: 0.3,
           ease: [0.175, 0.885, 0.32, 1.275]
         }}
+        layoutId="farmer-tips-card"
       >
         <h2 className="text-xl font-semibold mb-4">Советы для фермеров</h2>
         
         <div className="grid grid-cols-2 gap-3">
           <AnimatePresence>
-            {tips.map((tip, index) => {
-              // Получаем подходящую иконку для совета
-              const icon = getTipIcon(tip);
-              
-              return (
-                <motion.div
-                  key={index}
-                  className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex cursor-pointer"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
-                    duration: 0.3,
-                    delay: 0.4 + index * 0.05,
-                    ease: "easeOut"
-                  }}
-                  onClick={() => setSelectedTip({ text: tip, icon: icon })}
-                >
-                  <div className="w-10 h-10 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
-                    <span className="text-xl">{icon}</span>
-                  </div>
-                  <p className="text-sm font-medium leading-tight line-clamp-2 overflow-hidden text-ellipsis">
-                    {tip}
-                  </p>
-                </motion.div>
-              );
-            })}
+            {tips.map((tip, index) => (
+              <TipItem
+                key={index}
+                tip={tip}
+                index={index}
+                onClick={() => setSelectedTip({ text: tip, icon: getTipIcon(tip) })}
+                isAnimating={isAnimating}
+              />
+            ))}
           </AnimatePresence>
         </div>
       </motion.div>
@@ -210,7 +252,7 @@ const FarmerTips = () => {
             onClick={() => setSelectedTip(null)}
           >
             <motion.div
-              className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-lg"
+              className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-lg will-change-transform"
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -244,6 +286,8 @@ const FarmerTips = () => {
       </AnimatePresence>
     </>
   )
-}
+})
+
+FarmerTips.displayName = 'FarmerTips'
 
 export default FarmerTips
