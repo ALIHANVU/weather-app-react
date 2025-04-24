@@ -61,8 +61,8 @@ const CurrentWeather = () => {
       <div className="p-6 text-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-semibold">{currentCity || name}</h1>
-          <div className="scale-150 origin-center">
-            <WeatherIcon iconCode={weather && weather[0] ? weather[0].icon : '01d'} size={80} />
+          <div className="scale-190 origin-center">
+            <WeatherIcon iconCode={weather && weather[0] ? weather[0].icon : '01d'} size={100} />
           </div>
         </div>
         
