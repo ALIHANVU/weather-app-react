@@ -10,4 +10,17 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      // Проксирование API-запросов на Vercel API Routes
+      // или на локальный сервер разработки
+      '/api': {
+        target: process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:3000' 
+          : 'https://weather-app-react-29m2.vercel.app',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
+    }
+  }
 })
