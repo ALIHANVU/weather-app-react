@@ -87,10 +87,31 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
+    --ios-bg: var(--ios-bg-dark);
+    --ios-card-bg: var(--ios-card-bg-dark);
+    --ios-text-primary: var(--ios-text-primary-dark);
+    --ios-text-secondary: var(--ios-text-secondary-dark);
+    --ios-text-tertiary: var(--ios-text-tertiary-dark);
+    --ios-blue: var(--ios-blue-dark);
+    --ios-red: var(--ios-red-dark);
+    --ios-green: var(--ios-green-dark);
+    --ios-yellow: var(--ios-yellow-dark);
+    --ios-orange: var(--ios-orange-dark);
+    --ios-purple: var(--ios-purple-dark);
+    
+    --ios-fill-quaternary: var(--ios-fill-quaternary-dark);
+    --ios-fill-tertiary: var(--ios-fill-tertiary-dark);
+    --ios-fill-secondary: var(--ios-fill-secondary-dark);
+    --ios-fill-primary: var(--ios-fill-primary-dark);
+    
+    --ios-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+    --ios-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+    --ios-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
   }
 }
 
 html.dark {
+  color-scheme: dark;
   --ios-bg: var(--ios-bg-dark);
   --ios-card-bg: var(--ios-card-bg-dark);
   --ios-text-primary: var(--ios-text-primary-dark);
@@ -111,8 +132,6 @@ html.dark {
   --ios-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
   --ios-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
   --ios-shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
-  
-  color-scheme: dark;
 }
 
 /* Базовые стили */
@@ -135,12 +154,14 @@ body {
 }
 
 html.dark body {
+  background-color: var(--ios-bg-dark);
   background-image: linear-gradient(
     180deg, 
     rgba(40, 60, 100, 0.08) 0%, 
     rgba(0, 0, 0, 0) 50%
   );
 }
+
 
 /* iOS компоненты */
 .ios-container {
