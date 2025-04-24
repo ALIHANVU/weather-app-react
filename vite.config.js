@@ -12,14 +12,40 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      // Проксирование API-запросов на Vercel API Routes
-      // или на локальный сервер разработки
+      // Проксирование API-запросов на локальный сервер разработки
       '/api': {
-        target: process.env.NODE_ENV === 'development' 
-          ? 'http://localhost:3000' 
-          : 'https://weather-app-react-29m2.vercel.app',
+        target: 'http://localhost:3000',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Отправка запроса к:', req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Получен ответ для:', req.url, 'статус:', proxyRes.statusCode);
+          });
+        }
+      }
+    },
+    cors: true,
+    port: 5173,
+    host: true,
+    open: true,
+    hmr: {
+      overlay: true
+    }
+  },
+  build: {
+    sourcemap: true,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: false,
+        drop_debugger: true
       }
     }
   }
