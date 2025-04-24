@@ -162,6 +162,19 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
     isInitialLoading
   ])
 
+  // Загрузка свежих данных - мемоизируем эту функцию
+  const loadFreshWeatherData = useMemo(() => async () => {
+    try {
+      // Проверяем сохраненный город
+      const savedCity = getLastCity() || DEFAULT_CITY
+      
+      // Загружаем данные для сохраненного города
+      await loadWeatherData(savedCity, true)
+    } catch (error) {
+      console.warn('Ошибка загрузки свежих данных:', error.message)
+    }
+  }, [loadWeatherData])
+
   // Экспортируем контекст для отладки
   useEffect(() => {
     if (typeof document !== 'undefined' && document.getElementById('root')) {
@@ -241,19 +254,6 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
       initApp()
     }
   }, [loadWeatherData, setLoading, setShowWeather, setError, loadFreshWeatherData])
-
-  // Загрузка свежих данных - мемоизируем эту функцию
-  const loadFreshWeatherData = useCallback(async () => {
-    try {
-      // Проверяем сохраненный город
-      const savedCity = getLastCity() || DEFAULT_CITY
-      
-      // Загружаем данные для сохраненного города
-      await loadWeatherData(savedCity)
-    } catch (error) {
-      console.warn('Ошибка загрузки свежих данных:', error.message)
-    }
-  }, [loadWeatherData])
 
   // Обработчик поиска города
   const handleSearch = useCallback(async (city) => {
