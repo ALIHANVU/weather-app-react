@@ -1,14 +1,10 @@
-// API ключ для OpenWeatherMap
-const API_KEY = 'c708426913319b328c4ff4719583d1c6'
-// Базовый URL для API
-const BASE_URL = 'https://api.openweathermap.org'
 // Таймауты для запросов
 const TIMEOUTS = {
   API_REQUEST: 5000 // 5 секунд
 }
 
 /**
- * Получает данные о погоде через API с повторными попытками
+ * Получает данные о погоде через Vercel API Routes с повторными попытками
  * @param {string} city - Название города
  * @param {number} retries - Количество повторных попыток
  * @returns {Promise<Object>} Данные о погоде
@@ -17,149 +13,32 @@ export async function fetchWeatherData(city, retries = 2) {
   try {
     console.log('Запрашиваем погоду для города:', city)
     
-    // Создаем URL для прямого геокодирования
-    const geoUrl = `${BASE_URL}/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`
+    // Создаем URL для API маршрута
+    // Для локальной разработки используем относительный путь
+    // URL сам определит, обращаться к /api/weather локально или на продакшене
+    const apiUrl = `/api/weather?city=${encodeURIComponent(city)}`
     
-    console.log('Отправляем запрос к Geo API:', geoUrl)
+    console.log('Отправляем запрос к API:', apiUrl)
     
     // Добавляем таймаут к запросу
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.API_REQUEST);
     
     try {
-      // Прямой запрос к API геокодирования для получения координат города
-      const geoResponse = await fetch(geoUrl, { 
+      // Запрос к нашему API маршруту
+      const response = await fetch(apiUrl, { 
         signal: controller.signal,
-        mode: 'cors',
         headers: {
           'Content-Type': 'application/json'
         }
       });
       clearTimeout(timeoutId);
       
-      if (!geoResponse.ok) {
-        throw new Error(`Ошибка геокодирования: ${geoResponse.status}`)
+      if (!response.ok) {
+        throw new Error(`Ошибка API: ${response.status}`)
       }
       
-      const geoData = await geoResponse.json()
-      console.log('Ответ от Geo API:', geoData)
-      
-      // Если город не найден, пробуем искать через альтернативный API
-      if (!geoData || geoData.length === 0) {
-        console.log('Город не найден через основной API, пробуем прямой запрос погоды')
-        
-        // Пробуем прямой запрос текущей погоды по названию города
-        const directWeatherUrl = `${BASE_URL}/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=ru&appid=${API_KEY}`
-        
-        console.log('Отправляем прямой запрос текущей погоды:', directWeatherUrl)
-        
-        // Новый контроллер для нового запроса
-        const weatherController = new AbortController();
-        const weatherTimeoutId = setTimeout(() => weatherController.abort(), TIMEOUTS.API_REQUEST);
-        
-        const weatherResponse = await fetch(directWeatherUrl, { 
-          signal: weatherController.signal,
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        clearTimeout(weatherTimeoutId);
-        
-        if (!weatherResponse.ok) {
-          throw new Error(`Город не найден: ${weatherResponse.status}`)
-        }
-        
-        const weather = await weatherResponse.json()
-        
-        // Получаем координаты из ответа по погоде
-        const { lat, lon } = weather.coord
-        
-        // Теперь получаем прогноз по координатам
-        const forecastUrl = `${BASE_URL}/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`
-        console.log('Получаем прогноз по координатам:', forecastUrl)
-        
-        // Новый контроллер для запроса прогноза
-        const forecastController = new AbortController();
-        const forecastTimeoutId = setTimeout(() => forecastController.abort(), TIMEOUTS.API_REQUEST);
-        
-        const forecastResponse = await fetch(forecastUrl, { 
-          signal: forecastController.signal,
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        clearTimeout(forecastTimeoutId);
-        
-        if (!forecastResponse.ok) {
-          throw new Error(`Ошибка получения прогноза: ${forecastResponse.status}`)
-        }
-        
-        const forecast = await forecastResponse.json()
-        
-        return { weather, forecast }
-      }
-      
-      // Получаем координаты из результата геокодирования
-      const { lat, lon, name } = geoData[0]
-      
-      console.log('Получены координаты:', lat, lon, 'для города:', name)
-      
-      // Теперь получаем текущую погоду и прогноз по координатам
-      const weatherUrl = `${BASE_URL}/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`
-      const forecastUrl = `${BASE_URL}/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`
-      
-      console.log('Запрашиваем текущую погоду и прогноз по координатам')
-      
-      // Выполняем параллельные запросы для текущей погоды и прогноза
-      const weatherController = new AbortController();
-      const forecastController = new AbortController();
-      
-      const weatherTimeoutId = setTimeout(() => weatherController.abort(), TIMEOUTS.API_REQUEST);
-      const forecastTimeoutId = setTimeout(() => forecastController.abort(), TIMEOUTS.API_REQUEST);
-      
-      try {
-        const [weatherResponse, forecastResponse] = await Promise.all([
-          fetch(weatherUrl, { 
-            signal: weatherController.signal,
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }),
-          fetch(forecastUrl, { 
-            signal: forecastController.signal,
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          })
-        ]);
-        
-        clearTimeout(weatherTimeoutId);
-        clearTimeout(forecastTimeoutId);
-        
-        if (!weatherResponse.ok) {
-          throw new Error(`Ошибка получения текущей погоды: ${weatherResponse.status}`)
-        }
-        
-        if (!forecastResponse.ok) {
-          throw new Error(`Ошибка получения прогноза: ${forecastResponse.status}`)
-        }
-        
-        const weather = await weatherResponse.json()
-        const forecast = await forecastResponse.json()
-        
-        // Сохраняем название города из запроса пользователя
-        weather.name = name || city
-        
-        return { weather, forecast }
-      } catch (parallelError) {
-        clearTimeout(weatherTimeoutId);
-        clearTimeout(forecastTimeoutId);
-        throw parallelError;
-      }
+      return await response.json()
     } catch (fetchError) {
       clearTimeout(timeoutId);
       throw fetchError;
