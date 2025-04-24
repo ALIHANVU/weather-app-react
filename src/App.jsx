@@ -90,13 +90,7 @@ function App() {
       
       <div className="ios-safe-top ios-safe-bottom ios-safe-left ios-safe-right">
         <div className="ios-container py-2">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-bold">Погода для фермеров</h1>
-            <div className="w-8 h-8 flex items-center justify-center">
-              {/* Добавляем иконку для примера */}
-              <WeatherIcon iconCode="01d" size={28} />
-            </div>
-          </div>
+          {/* Заголовок удален */}
           
           {/* Секция поиска */}
           <SearchSection />
