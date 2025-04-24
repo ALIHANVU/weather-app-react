@@ -1,10 +1,160 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo, useCallback } from 'react'
 import { X, Clock, Wind, Droplets, Eye, Thermometer } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useWeather from '../../hooks/useWeather'
 import { formatTime } from '../../utils/dateUtils'
 import { generateFarmerTips, isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
 import WeatherIcon from '../shared/WeatherIcon'
+
+/**
+ * Оптимизированный компонент деталей для модального окна
+ */
+const ModalDetail = memo(({ detail, index }) => {
+  return (
+    <motion.div 
+      key={detail.title}
+      className="bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 flex items-center"
+      custom={index}
+      initial="hidden"
+      animate="visible"
+      whileHover="hover"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: (i) => ({
+          opacity: 1,
+          y: 0,
+          transition: {
+            delay: 0.2 + i * 0.05,
+            duration: 0.3,
+            ease: [0, 0, 0.2, 1]
+          }
+        }),
+        hover: {
+          y: -3,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          transition: {
+            duration: 0.2
+          }
+        }
+      }}
+    >
+      <motion.div 
+        className="w-8 h-8 mr-3 rounded-full bg-white dark:bg-gray-800 
+                  flex items-center justify-center flex-shrink-0"
+        whileHover={{ rotate: [0, -10, 10, -5, 0], transition: { duration: 0.5 } }}
+      >
+        {detail.icon}
+      </motion.div>
+      <div>
+        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+          {detail.title}
+        </div>
+        <div className="text-base font-bold">
+          {detail.value}
+        </div>
+      </div>
+    </motion.div>
+  )
+})
+
+ModalDetail.displayName = 'ModalDetail'
+
+/**
+ * Оптимизированный элемент часового прогноза
+ */
+const HourlyItem = memo(({ item, index, formatTime }) => {
+  return (
+    <motion.div 
+      key={index} 
+      className="flex flex-col items-center min-w-16 mx-2"
+      custom={index}
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0, x: -5 },
+        visible: (i) => ({
+          opacity: 1,
+          x: 0,
+          transition: {
+            delay: 0.2 + i * 0.04,
+            duration: 0.3,
+            ease: [0, 0, 0.2, 1]
+          }
+        })
+      }}
+      whileHover={{ 
+        y: -3, 
+        transition: { duration: 0.2 } 
+      }}
+    >
+      <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+        {formatTime(item.dt)}
+      </div>
+      <motion.div 
+        className="mb-2"
+        whileHover={{ 
+          scale: 1.1, 
+          transition: { duration: 0.2 } 
+        }}
+      >
+        <WeatherIcon 
+          iconCode={item.weather && item.weather[0] ? item.weather[0].icon : '01d'} 
+          size={34} 
+        />
+      </motion.div>
+      <div className="font-bold text-lg">
+        {Math.round(item.main.temp)}°
+      </div>
+    </motion.div>
+  )
+})
+
+HourlyItem.displayName = 'HourlyItem'
+
+/**
+ * Оптимизированный элемент совета
+ */
+const TipItem = memo(({ tip, index, icon }) => {
+  return (
+    <motion.div
+      key={index}
+      className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex"
+      custom={index}
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0, y: 10 },
+        visible: (i) => ({
+          opacity: 1,
+          y: 0,
+          transition: {
+            delay: 0.3 + i * 0.08,
+            duration: 0.4,
+            ease: [0.175, 0.885, 0.32, 1.275]
+          }
+        })
+      }}
+      whileHover={{ 
+        x: 3, 
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+        transition: { duration: 0.2 } 
+      }}
+    >
+      <motion.div 
+        className="w-9 h-9 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full"
+        whileHover={{ rotate: 10, scale: 1.1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 10 }}
+      >
+        <span className="text-lg">{icon}</span>
+      </motion.div>
+      <p className="text-sm font-medium overflow-hidden text-ellipsis line-clamp-3">
+        {tip}
+      </p>
+    </motion.div>
+  )
+})
+
+TipItem.displayName = 'TipItem'
 
 /**
  * Компонент модального окна с деталями дня и улучшенными анимациями
@@ -16,6 +166,19 @@ const DayModal = () => {
   const { modalVisible, selectedDayData, closeDayModal } = useWeather()
   // Состояние для советов фермерам
   const [tips, setTips] = useState([])
+  // Проверка первого рендера для задержки анимации
+  const [hasAnimated, setHasAnimated] = useState(false)
+  
+  // Функция для получения иконки для совета
+  const getTipIcon = useCallback((tip) => {
+    const emojis = ['🚿', '🌱', '☂️', '🌡️', '🌿', '🌾', '🍃', '🌸', '🌻', '🌞', '🍂']
+    return emojis[Math.floor(Math.random() * emojis.length)]
+  }, [])
+  
+  // Функция для плавного закрытия модального окна
+  const handleClose = useCallback(() => {
+    closeDayModal()
+  }, [closeDayModal])
   
   // Генерируем советы при изменении выбранного дня
   useEffect(() => {
@@ -52,6 +215,14 @@ const DayModal = () => {
       loadTips()
     }
   }, [modalVisible, selectedDayData])
+  
+  // Эффект для установки флага анимации
+  useEffect(() => {
+    if (modalVisible) {
+      // При открытии модального окна устанавливаем флаг анимации
+      setHasAnimated(true)
+    }
+  }, [modalVisible])
   
   // Если нет данных, или модальное окно скрыто, не рендерим ничего
   if (!modalVisible || !selectedDayData) return null
@@ -132,29 +303,31 @@ const DayModal = () => {
     }
   ]
   
-  // Варианты анимации для модального окна
+  // Улучшенные настройки анимации
   const overlayVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: {
-        duration: 0.3,
-        ease: [0.25, 0.1, 0.25, 1]
+        duration: 0.25, 
+        ease: [0.25, 0.1, 0.25, 1],
+        when: "beforeChildren" // Важно! Сначала анимируем оверлей, затем дочерние элементы
       }
     },
     exit: { 
       opacity: 0,
       transition: {
-        duration: 0.2,
-        ease: [0.4, 0.0, 1, 1]
+        duration: 0.15,
+        ease: [0.4, 0.0, 1, 1],
+        when: "afterChildren" // Важно! Сначала анимируем дочерние элементы, потом оверлей
       }
     }
   }
   
   const modalVariants = {
     hidden: { 
-      scale: 0.9, 
-      y: 20, 
+      scale: 0.95, 
+      y: 10, 
       opacity: 0 
     },
     visible: { 
@@ -163,9 +336,11 @@ const DayModal = () => {
       opacity: 1,
       transition: {
         type: 'spring',
-        damping: 25,
-        stiffness: 300,
-        duration: 0.4
+        damping: 30,
+        stiffness: 350,
+        duration: 0.35, 
+        delayChildren: 0.1,
+        staggerChildren: 0.05
       }
     },
     exit: { 
@@ -173,79 +348,34 @@ const DayModal = () => {
       y: 10, 
       opacity: 0,
       transition: {
-        duration: 0.25,
+        duration: 0.2,
         ease: [0.4, 0.0, 1, 1]
       }
     }
   }
   
-  // Варианты анимации для деталей погоды
-  const detailsVariants = {
-    hidden: { opacity: 0 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: 0.1 + i * 0.05,
-        duration: 0.3,
-        ease: [0, 0, 0.2, 1]
-      }
-    }),
-    hover: {
-      y: -3,
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-      transition: {
-        duration: 0.2
-      }
-    }
-  }
-  
-  // Варианты анимации для советов
-  const tipVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: 0.3 + i * 0.08,
-        duration: 0.4,
-        ease: [0.175, 0.885, 0.32, 1.275]
-      }
-    })
-  }
-  
-  // Варианты анимации для часовых элементов
-  const hourlyVariants = {
-    hidden: { opacity: 0, x: -5 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: 0.2 + i * 0.04,
-        duration: 0.3,
-        ease: [0, 0, 0.2, 1]
-      }
-    })
-  }
-  
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {modalVisible && (
         <motion.div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4 will-change-transform"
           initial="hidden"
           animate="visible"
           exit="exit"
           variants={overlayVariants}
-          onClick={closeDayModal}
+          onClick={handleClose}
+          // Предотвращаем дополнительный ререндер для плавной анимации
+          key="modal-overlay"
+          layoutId="modal-overlay"
         >
           <motion.div
-            className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[90vh] overflow-auto shadow-lg"
+            className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[90vh] overflow-auto shadow-lg will-change-transform"
             initial="hidden"
             animate="visible"
             exit="exit"
             variants={modalVariants}
             onClick={(e) => e.stopPropagation()}
+            layoutId="modal-content"
           >
             <div className="relative">
               {/* Градиентный фон для заголовка */}
@@ -258,18 +388,18 @@ const DayModal = () => {
                 <motion.button
                   whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={closeDayModal}
+                  onClick={handleClose}
                   className="absolute right-4 top-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.2 }}
+                  transition={{ delay: 0.2, duration: 0.2 }}
                 >
                   <X size={18} strokeWidth={2} />
                 </motion.button>
                 
                 <motion.h2 
                   className="text-2xl font-bold text-white mb-3"
-                  initial={{ y: -10, opacity: 0 }}
+                  initial={{ y: -5, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.3 }}
                 >
@@ -278,7 +408,7 @@ const DayModal = () => {
                 
                 <div className="flex items-center justify-between">
                   <motion.div
-                    initial={{ x: -10, opacity: 0 }}
+                    initial={{ x: -5, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.3, delay: 0.1 }}
                   >
@@ -288,9 +418,9 @@ const DayModal = () => {
                       animate={{ scale: 1 }}
                       transition={{ 
                         type: "spring", 
-                        stiffness: 300, 
+                        stiffness: 400, 
                         damping: 15, 
-                        delay: 0.2 
+                        delay: 0.15 
                       }}
                     >
                       {avgTemp}°
@@ -299,7 +429,7 @@ const DayModal = () => {
                       className="text-white/90 mt-1 capitalize"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3, delay: 0.3 }}
+                      transition={{ duration: 0.3, delay: 0.2 }}
                     >
                       {mostFrequentWeather.charAt(0).toUpperCase() + mostFrequentWeather.slice(1)}
                     </motion.div>
@@ -311,9 +441,9 @@ const DayModal = () => {
                     animate={{ rotate: 0, opacity: 1 }}
                     transition={{ 
                       type: "spring", 
-                      stiffness: 100, 
+                      stiffness: 200, 
                       damping: 10, 
-                      delay: 0.2 
+                      delay: 0.15 
                     }}
                   >
                     <WeatherIcon iconCode={mostFrequentIcon} size={60} />
@@ -324,7 +454,7 @@ const DayModal = () => {
                   className="text-white/80 text-sm mt-2"
                   initial={{ y: 5, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
+                  transition={{ duration: 0.3, delay: 0.25 }}
                 >
                   Макс.: <span className="font-medium">{maxTemp}°</span> • Мин.: <span className="font-medium">{minTemp}°</span>
                 </motion.div>
@@ -335,38 +465,18 @@ const DayModal = () => {
                 {/* Детали погоды */}
                 <motion.div 
                   className="mb-6"
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
+                  transition={{ duration: 0.3, delay: 0.15 }}
                 >
                   <h3 className="text-lg font-semibold mb-3">Детали</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {details.map((detail, index) => (
-                      <motion.div 
-                        key={detail.title}
-                        className="bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 flex items-center"
-                        custom={index}
-                        initial="hidden"
-                        animate="visible"
-                        whileHover="hover"
-                        variants={detailsVariants}
-                      >
-                        <motion.div 
-                          className="w-8 h-8 mr-3 rounded-full bg-white dark:bg-gray-800 
-                                    flex items-center justify-center flex-shrink-0"
-                          whileHover={{ rotate: [0, -10, 10, -5, 0], transition: { duration: 0.5 } }}
-                        >
-                          {detail.icon}
-                        </motion.div>
-                        <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                            {detail.title}
-                          </div>
-                          <div className="text-base font-bold">
-                            {detail.value}
-                          </div>
-                        </div>
-                      </motion.div>
+                      <ModalDetail 
+                        key={detail.title} 
+                        detail={detail} 
+                        index={index} 
+                      />
                     ))}
                   </div>
                 </motion.div>
@@ -374,53 +484,28 @@ const DayModal = () => {
                 {/* Почасовой прогноз для выбранного дня */}
                 <motion.div 
                   className="mb-6"
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
                 >
                   <h3 className="text-lg font-semibold mb-3">Прогноз по часам</h3>
                   <div className="flex overflow-x-auto pb-3 pt-1 -mx-2 px-2 scrollbar-hide">
                     {selectedDayData.hourlyData.map((item, index) => (
-                      <motion.div 
+                      <HourlyItem 
                         key={index} 
-                        className="flex flex-col items-center min-w-16 mx-2"
-                        custom={index}
-                        initial="hidden"
-                        animate="visible"
-                        variants={hourlyVariants}
-                        whileHover={{ 
-                          y: -3, 
-                          transition: { duration: 0.2 } 
-                        }}
-                      >
-                        <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">
-                          {formatTime(item.dt)}
-                        </div>
-                        <motion.div 
-                          className="mb-2"
-                          whileHover={{ 
-                            scale: 1.1, 
-                            transition: { duration: 0.2 } 
-                          }}
-                        >
-                          <WeatherIcon 
-                            iconCode={item.weather && item.weather[0] ? item.weather[0].icon : '01d'} 
-                            size={34} 
-                          />
-                        </motion.div>
-                        <div className="font-bold text-lg">
-                          {Math.round(item.main.temp)}°
-                        </div>
-                      </motion.div>
+                        item={item} 
+                        index={index} 
+                        formatTime={formatTime} 
+                      />
                     ))}
                   </div>
                 </motion.div>
                 
                 {/* Советы для фермеров */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.4 }}
+                  transition={{ duration: 0.3, delay: 0.25 }}
                 >
                   <h3 className="text-lg font-semibold mb-3">Советы для фермеров</h3>
                   
@@ -428,32 +513,12 @@ const DayModal = () => {
                     <AnimatePresence>
                       {tips.length > 0 ? (
                         tips.map((tip, index) => (
-                          <motion.div
+                          <TipItem 
                             key={index}
-                            className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex"
-                            custom={index}
-                            initial="hidden"
-                            animate="visible"
-                            variants={tipVariants}
-                            whileHover={{ 
-                              x: 3, 
-                              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-                              transition: { duration: 0.2 } 
-                            }}
-                          >
-                            <motion.div 
-                              className="w-9 h-9 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full"
-                              whileHover={{ rotate: 10, scale: 1.1 }}
-                              transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                            >
-                              <span className="text-lg">
-                                {['🚿', '🌱', '☂️', '🌡️', '🌿', '🌾', '🍃', '🌸'][index % 8]}
-                              </span>
-                            </motion.div>
-                            <p className="text-sm font-medium overflow-hidden text-ellipsis line-clamp-3">
-                              {tip}
-                            </p>
-                          </motion.div>
+                            tip={tip}
+                            index={index}
+                            icon={getTipIcon(tip)}
+                          />
                         ))
                       ) : (
                         <motion.div 
