@@ -40,7 +40,8 @@ export function WeatherProvider({ children, setShowWeather, setError, setLoading
     setLoading(true)
     
     try {
-      // Пробуем загрузить данные с API
+      // Пробуем загрузить данные через нашу API-функцию
+      // НЕ используем прямые запросы к OpenWeatherMap!
       const data = await fetchWeatherData(city)
       
       if (!data || !data.weather || !data.forecast) {
