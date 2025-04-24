@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion'
-import { isToday } from '../../utils/dateUtils'
 import { formatTime } from '../../utils/dateUtils'
-import { weatherEmoji } from '../../utils/weatherUtils'
 import useWeather from '../../hooks/useWeather'
+import WeatherIcon from '../shared/WeatherIcon'
 
 /**
- * Компонент почасового прогноза
+ * Компонент почасового прогноза с новыми iOS-иконками
  * 
  * @returns {JSX.Element}
  */
@@ -21,7 +20,7 @@ const HourlyForecast = () => {
   
   return (
     <motion.div
-      className="ios-card p-4 mb-4"
+      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ 
@@ -30,7 +29,9 @@ const HourlyForecast = () => {
         ease: [0.175, 0.885, 0.32, 1.275]
       }}
     >
-      <div className="flex overflow-x-auto py-2 scrollbar-hide">
+      <h2 className="text-xl font-semibold mb-4 px-2">Почасовой прогноз</h2>
+      
+      <div className="flex overflow-x-auto pb-3 pt-1 scrollbar-hide">
         {hourlyData.map((item, index) => {
           // Определяем, является ли этот час текущим
           const isFirst = index === 0
@@ -38,7 +39,7 @@ const HourlyForecast = () => {
           return (
             <motion.div
               key={item.dt}
-              className="ios-forecast-hour mx-2 first:ml-1 last:mr-1"
+              className="flex flex-col items-center min-w-16 mx-1"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ 
@@ -47,13 +48,16 @@ const HourlyForecast = () => {
                 ease: "easeOut"
               }}
             >
-              <div className="text-ios-text-secondary ios-text-caption1 mb-2">
+              <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">
                 {isFirst ? 'Сейчас' : formatTime(item.dt)}
               </div>
-              <div className="text-2xl mb-2">
-                {item.weather && item.weather[0] ? weatherEmoji[item.weather[0].icon] : "🌦️"}
+              <div className="mb-2">
+                <WeatherIcon 
+                  iconCode={item.weather && item.weather[0] ? item.weather[0].icon : '01d'} 
+                  size={38} 
+                />
               </div>
-              <div className="ios-text-headline font-semibold">
+              <div className="font-bold text-lg">
                 {Math.round(item.main.temp)}°
               </div>
             </motion.div>
