@@ -174,7 +174,50 @@ module.exports = {
         "ios-md": "20px",
         "ios-lg": "30px",
       },
+      // Добавляем линии для многоточия
+      lineClamp: {
+        1: '1',
+        2: '2',
+        3: '3',
+        4: '4',
+        5: '5',
+      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // Добавляем собственный плагин для line-clamp
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.line-clamp-1': {
+          display: '-webkit-box',
+          '-webkit-line-clamp': '1',
+          '-webkit-box-orient': 'vertical',
+          overflow: 'hidden',
+          'text-overflow': 'ellipsis',
+        },
+        '.line-clamp-2': {
+          display: '-webkit-box',
+          '-webkit-line-clamp': '2',
+          '-webkit-box-orient': 'vertical',
+          overflow: 'hidden',
+          'text-overflow': 'ellipsis',
+        },
+        '.line-clamp-3': {
+          display: '-webkit-box',
+          '-webkit-line-clamp': '3',
+          '-webkit-box-orient': 'vertical',
+          overflow: 'hidden',
+          'text-overflow': 'ellipsis',
+        },
+        '.line-clamp-none': {
+          display: 'inline',
+          '-webkit-line-clamp': 'unset',
+          '-webkit-box-orient': 'horizontal',
+          overflow: 'visible',
+        },
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }
