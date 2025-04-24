@@ -624,3 +624,38 @@ html.dark .ios-weather-icon {
     overflow: hidden;
   }
 }
+/* Line-clamp утилиты для многоточия */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Обеспечим поддержку в разных браузерах */
+.text-ellipsis {
+  text-overflow: ellipsis;
+}
+
+/* Дополнительные стили для карточек советов */
+.ios-tip-item p {
+  word-break: break-word;
+  hyphens: auto;
+}
