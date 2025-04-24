@@ -9,7 +9,8 @@ import WeeklyForecast from './components/weather/WeeklyForecast'
 import DayModal from './components/layout/DayModal'
 import ErrorNotification from './components/shared/ErrorNotification'
 import LoadingSpinner from './components/shared/LoadingSpinner'
-import DarkModeEnforcer from './components/shared/DarkModeEnforcer' // Импортируем новый компонент
+import DarkModeEnforcer from './components/shared/DarkModeEnforcer'
+import WeatherIcon from './components/shared/WeatherIcon'
 
 // Компонент для отладки
 const DebugInfo = ({ error, isVisible }) => {
@@ -88,7 +89,15 @@ function App() {
       <DarkModeEnforcer darkMode={darkMode} />
       
       <div className="ios-safe-top ios-safe-bottom ios-safe-left ios-safe-right">
-        <div className="ios-container">
+        <div className="ios-container py-2">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-2xl font-bold">Погода для фермеров</h1>
+            <div className="w-8 h-8 flex items-center justify-center">
+              {/* Добавляем иконку для примера */}
+              <WeatherIcon iconCode="01d" size={28} />
+            </div>
+          </div>
+          
           {/* Секция поиска */}
           <SearchSection />
 
@@ -108,21 +117,24 @@ function App() {
               {/* Почасовой прогноз */}
               <HourlyForecast />
               
-              {/* Детали погоды */}
-              <WeatherDetails />
-              
               {/* Советы для фермеров */}
               <FarmerTips />
+              
+              {/* Детали погоды */}
+              <WeatherDetails />
               
               {/* Прогноз на неделю */}
               <WeeklyForecast />
             </div>
           ) : !loading ? (
-            <div className="ios-card p-8 text-center mt-8">
-              <h2 className="ios-text-title2 mb-4">Погода не загружена</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center mt-8 shadow-sm">
+              <div className="flex justify-center mb-4">
+                <WeatherIcon iconCode="01d" size={80} />
+              </div>
+              <h2 className="text-xl font-semibold mb-4">Погода не загружена</h2>
               <p className="mb-4">Введите название города в поле поиска или нажмите кнопку ниже для загрузки погоды для Москвы.</p>
               <button 
-                className="ios-button bg-ios-blue text-white py-2 px-4 rounded-ios-pill" 
+                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-full font-medium transition-colors" 
                 onClick={() => {
                   const weatherContext = document.getElementById('root')?.__WEATHER_CONTEXT__;
                   if (weatherContext && weatherContext.loadWeatherData) {
