@@ -3,10 +3,11 @@ import { X, Clock, Wind, Droplets, Eye, Thermometer } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useWeather from '../../hooks/useWeather'
 import { formatTime } from '../../utils/dateUtils'
-import { weatherEmoji, generateFarmerTips, isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
+import { generateFarmerTips, isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
+import WeatherIcon from '../shared/WeatherIcon'
 
 /**
- * Компонент модального окна с деталями дня в стиле iOS
+ * Компонент модального окна с деталями дня и новыми иконками
  * 
  * @returns {JSX.Element}
  */
@@ -107,205 +108,172 @@ const DayModal = () => {
   // Проверка на экстремальную температуру
   const isExtremeTemp = isExtremeTemperatureForPlants(avgTemp)
   
+  // Детали погоды для модального окна
+  const details = [
+    {
+      title: 'ВЕТЕР',
+      value: `${avgWindSpeed} м/с`,
+      icon: <Wind size={18} strokeWidth={1.5} className="text-blue-500" />
+    },
+    {
+      title: 'ВЛАЖНОСТЬ',
+      value: `${avgHumidity}%`,
+      icon: <Droplets size={18} strokeWidth={1.5} className="text-blue-400" />
+    },
+    {
+      title: 'ВИДИМОСТЬ',
+      value: `${avgVisibility} км`,
+      icon: <Eye size={18} strokeWidth={1.5} className="text-indigo-400" />
+    },
+    {
+      title: 'ОЩУЩАЕТСЯ',
+      value: `${avgFeelsLike}°`,
+      icon: <Thermometer size={18} strokeWidth={1.5} className="text-orange-500" />
+    }
+  ]
+  
   return (
-    <motion.div
-      className={`ios-modal ${modalVisible ? 'visible' : ''}`}
-      initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-      animate={{ 
-        opacity: modalVisible ? 1 : 0,
-        backdropFilter: modalVisible ? 'blur(20px)' : 'blur(0px)'
-      }}
-      transition={{ duration: 0.3 }}
-    >
-      <motion.div
-        className="ios-modal-content"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ 
-          opacity: modalVisible ? 1 : 0,
-          y: modalVisible ? 0 : 10
-        }}
-        transition={{ 
-          y: { type: 'spring', stiffness: 300, damping: 30 },
-          opacity: { duration: 0.3 }
-        }}
-      >
-        <button
-          onClick={closeDayModal}
-          className="ios-close-button"
+    <AnimatePresence>
+      {modalVisible && (
+        <motion.div
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          <X size={18} strokeWidth={2} />
-        </button>
-        
-        {/* Основная информация о погоде */}
-        <div className="ios-card text-center p-5 mt-2.5 mb-4 relative">
-          <h2 className="ios-text-title1">{selectedDayData.day}</h2>
-          <div className="text-[76px] font-extralight leading-tight my-1">{avgTemp}°</div>
-          <div className="ios-text-headline mb-2 capitalize">
-            {mostFrequentWeather.charAt(0).toUpperCase() + mostFrequentWeather.slice(1)}
-          </div>
-          <div className="text-ios-text-secondary ios-text-subheadline">
-            Макс.: <span>{maxTemp}</span>° Мин.: <span>{minTemp}</span>°
-          </div>
-          
-          {/* Индикатор экстремальной температуры */}
-          {isExtremeTemp && (
-            <div className="absolute top-4 right-4 text-ios-red animate-pulse">
-              <svg 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="1.5"
-                className="w-6 h-6"
-              >
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-              </svg>
-            </div>
-          )}
-        </div>
-        
-        {/* Почасовой прогноз для выбранного дня */}
-        <div className="ios-card p-4 mb-4">
-          <div className="flex items-center mb-3">
-            <span className="text-ios-text-secondary mr-2.5">
-              <Clock size={20} strokeWidth={1.5} />
-            </span>
-            <span className="ios-text-title2">Прогноз на день</span>
-          </div>
-          
-          <div className="flex overflow-x-auto py-2 scrollbar-hide">
-            {selectedDayData.hourlyData.map((item, index) => (
-              <div key={index} className="ios-forecast-hour mx-2 first:ml-1 last:mr-1">
-                <div className="text-ios-text-secondary ios-text-caption1 mb-2">
-                  {formatTime(item.dt)}
+          <motion.div
+            className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[90vh] overflow-auto shadow-lg"
+            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+            transition={{ 
+              type: 'spring',
+              damping: 25,
+              stiffness: 300,
+              duration: 0.3
+            }}
+          >
+            <div className="relative">
+              {/* Градиентный фон для заголовка */}
+              <div className={`rounded-t-3xl p-6 ${isExtremeTemp ? 'bg-gradient-to-r from-orange-400 to-red-500' : 'bg-gradient-to-r from-blue-400 to-indigo-500'}`}>
+                <button
+                  onClick={closeDayModal}
+                  className="absolute right-4 top-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white"
+                >
+                  <X size={18} strokeWidth={2} />
+                </button>
+                
+                <h2 className="text-2xl font-bold text-white mb-3">{selectedDayData.day}</h2>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-5xl font-light text-white">{avgTemp}°</div>
+                    <div className="text-white/90 mt-1 capitalize">
+                      {mostFrequentWeather.charAt(0).toUpperCase() + mostFrequentWeather.slice(1)}
+                    </div>
+                  </div>
+                  <div className="scale-125 origin-center">
+                    <WeatherIcon iconCode={mostFrequentIcon} size={60} />
+                  </div>
                 </div>
-                <div className="text-2xl mb-2">
-                  {item.weather && item.weather[0] ? weatherEmoji[item.weather[0].icon] : "🌦️"}
-                </div>
-                <div className="ios-text-headline font-semibold">
-                  {Math.round(item.main.temp)}°
+                <div className="text-white/80 text-sm mt-2">
+                  Макс.: <span className="font-medium">{maxTemp}°</span> • Мин.: <span className="font-medium">{minTemp}°</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Детали погоды */}
-        <div className="ios-card p-4 mb-4">
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-            <div className="ios-detail-item">
-              <div className="flex items-center mb-1.5">
-                <span className="text-ios-text-secondary mr-2">
-                  <Wind size={16} strokeWidth={1.5} />
-                </span>
-                <span className="ios-text-caption2">ВЕТЕР</span>
-              </div>
-              <div className="ios-text-headline font-medium">{avgWindSpeed} м/с</div>
-            </div>
-            
-            <div className="ios-detail-item">
-              <div className="flex items-center mb-1.5">
-                <span className="text-ios-text-secondary mr-2">
-                  <Droplets size={16} strokeWidth={1.5} />
-                </span>
-                <span className="ios-text-caption2">ВЛАЖНОСТЬ</span>
-              </div>
-              <div className="ios-text-headline font-medium">{avgHumidity}%</div>
-            </div>
-            
-            <div className="ios-detail-item">
-              <div className="flex items-center mb-1.5">
-                <span className="text-ios-text-secondary mr-2">
-                  <Eye size={16} strokeWidth={1.5} />
-                </span>
-                <span className="ios-text-caption2">ВИДИМОСТЬ</span>
-              </div>
-              <div className="ios-text-headline font-medium">{avgVisibility} км</div>
-            </div>
-            
-            <div className="ios-detail-item">
-              <div className="flex items-center mb-1.5">
-                <span className="text-ios-text-secondary mr-2">
-                  <Thermometer size={16} strokeWidth={1.5} />
-                </span>
-                <span className="ios-text-caption2">ОЩУЩАЕТСЯ</span>
-              </div>
-              <div className="ios-text-headline font-medium">{avgFeelsLike}°</div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Советы для фермеров */}
-        <div className="ios-card p-4">
-          <div className="flex items-center mb-3">
-            <span className="text-ios-text-secondary mr-2.5">
-              <svg 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="1.5"
-                className="w-5 h-5"
-              >
-                <path d="M12 2L7 7.5M12 2L17 7.5M12 2V6M7 7.5C3 8.5 3 12 3 13C3 14 3.5 18 8 19M7 7.5L8 6.5M17 7.5C21 8.5 21 12 21 13C21 14 20.5 18 16 19M17 7.5L16 6.5M8 19C10 19.5 14 19.5 16 19M8 19L7.5 20.5L12 22L16.5 20.5L16 19"/>
-              </svg>
-            </span>
-            <span className="ios-text-title2">Советы для фермеров</span>
-          </div>
-          
-          <div className="flex flex-col gap-2.5">
-            <AnimatePresence>
-              {tips.length > 0 ? (
-                tips.map((tip, index) => (
-                  <motion.div
-                    key={index}
-                    className="ios-tip-item"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                      delay: index * 0.1,
-                      duration: 0.3
-                    }}
-                  >
-                    <span className="text-ios-text-secondary flex-shrink-0 mr-2.5 mt-0.5">
-                      <svg 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="1.5"
-                        className="w-4 h-4"
+              
+              {/* Содержимое модального окна */}
+              <div className="p-5">
+                {/* Детали погоды */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">Детали</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {details.map((detail, index) => (
+                      <div 
+                        key={detail.title}
+                        className="bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 flex items-center"
                       >
-                        <path d="M12 2L7 7.5M12 2L17 7.5M12 2V6M7 7.5C3 8.5 3 12 3 13C3 14 3.5 18 8 19M7 7.5L8 6.5M17 7.5C21 8.5 21 12 21 13C21 14 20.5 18 16 19M17 7.5L16 6.5M8 19C10 19.5 14 19.5 16 19M8 19L7.5 20.5L12 22L16.5 20.5L16 19"/>
-                      </svg>
-                    </span>
-                    <span className="ios-text-subheadline flex-1 leading-tight">
-                      {tip}
-                    </span>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="ios-tip-item opacity-70">
-                  <span className="text-ios-text-secondary flex-shrink-0 mr-2.5 mt-0.5">
-                    <svg 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      strokeWidth="1.5"
-                      className="w-4 h-4"
-                    >
-                      <path d="M12 2L7 7.5M12 2L17 7.5M12 2V6M7 7.5C3 8.5 3 12 3 13C3 14 3.5 18 8 19M7 7.5L8 6.5M17 7.5C21 8.5 21 12 21 13C21 14 20.5 18 16 19M17 7.5L16 6.5M8 19C10 19.5 14 19.5 16 19M8 19L7.5 20.5L12 22L16.5 20.5L16 19"/>
-                    </svg>
-                  </span>
-                  <span className="ios-text-subheadline flex-1 leading-tight">
-                    Загрузка советов...
-                  </span>
+                        <div className="w-8 h-8 mr-3 rounded-full bg-white dark:bg-gray-800 
+                                      flex items-center justify-center flex-shrink-0">
+                          {detail.icon}
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                            {detail.title}
+                          </div>
+                          <div className="text-base font-bold">
+                            {detail.value}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+                
+                {/* Почасовой прогноз для выбранного дня */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold mb-3">Прогноз по часам</h3>
+                  <div className="flex overflow-x-auto pb-3 pt-1 -mx-2 px-2 scrollbar-hide">
+                    {selectedDayData.hourlyData.map((item, index) => (
+                      <div key={index} className="flex flex-col items-center min-w-16 mx-2">
+                        <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+                          {formatTime(item.dt)}
+                        </div>
+                        <div className="mb-2">
+                          <WeatherIcon 
+                            iconCode={item.weather && item.weather[0] ? item.weather[0].icon : '01d'} 
+                            size={34} 
+                          />
+                        </div>
+                        <div className="font-bold text-lg">
+                          {Math.round(item.main.temp)}°
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Советы для фермеров */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Советы для фермеров</h3>
+                  
+                  <div className="space-y-2.5">
+                    <AnimatePresence>
+                      {tips.length > 0 ? (
+                        tips.map((tip, index) => (
+                          <motion.div
+                            key={index}
+                            className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ 
+                              delay: index * 0.1,
+                              duration: 0.3
+                            }}
+                          >
+                            <div className="w-9 h-9 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
+                              <span className="text-lg">
+                                {['🚿', '🌱', '☂️', '🌡️', '🌿', '🌾', '🍃', '🌸'][index % 8]}
+                              </span>
+                            </div>
+                            <p className="text-sm font-medium">
+                              {tip}
+                            </p>
+                          </motion.div>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+                          Загрузка советов...
+                        </div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
