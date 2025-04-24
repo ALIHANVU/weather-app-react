@@ -41,12 +41,14 @@ export default defineConfig({
   },
   build: {
     sourcemap: true,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: false,
-        drop_debugger: true
-      }
-    }
+    // Используем esbuild вместо terser
+    minify: 'esbuild',
+    // Удаляем настройки terser
+    // terserOptions: {
+    //   compress: {
+    //     drop_console: false,
+    //     drop_debugger: true
+    //   }
+    // }
   }
 })
