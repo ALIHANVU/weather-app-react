@@ -1,6 +1,6 @@
 // Таймауты для запросов
 const TIMEOUTS = {
-  API_REQUEST: 5000 // 5 секунд
+  API_REQUEST: 10000 // 10 секунд
 }
 
 /**
@@ -14,8 +14,7 @@ export async function fetchWeatherData(city, retries = 2) {
     console.log('Запрашиваем погоду для города:', city)
     
     // Создаем URL для API маршрута
-    // Для локальной разработки используем относительный путь
-    // URL сам определит, обращаться к /api/weather локально или на продакшене
+    // Используем абсолютный путь, начинающийся с /api
     const apiUrl = `/api/weather?city=${encodeURIComponent(city)}`
     
     console.log('Отправляем запрос к API:', apiUrl)
@@ -28,19 +27,41 @@ export async function fetchWeatherData(city, retries = 2) {
       // Запрос к нашему API маршруту
       const response = await fetch(apiUrl, { 
         signal: controller.signal,
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
         }
       });
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        throw new Error(`Ошибка API: ${response.status}`)
+        const errorText = await response.text();
+        throw new Error(`Ошибка API: ${response.status} - ${errorText}`)
       }
       
-      return await response.json()
+      const data = await response.json();
+      
+      // Проверяем структуру данных
+      if (!data || (!data.weather && !data.error)) {
+        throw new Error('Неверный формат данных от API')
+      }
+      
+      // Проверяем наличие ошибки в ответе
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      
+      return data;
     } catch (fetchError) {
       clearTimeout(timeoutId);
+      
+      // Проверяем, является ли ошибка отменой из-за таймаута
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Превышено время ожидания запроса');
+      }
+      
       throw fetchError;
     }
   } catch (error) {
@@ -90,6 +111,12 @@ export async function loadFarmerTips(retries = 2) {
       return data
     } catch (fetchError) {
       clearTimeout(timeoutId);
+      
+      // Проверяем, является ли ошибка отменой из-за таймаута
+      if (fetchError.name === 'AbortError') {
+        throw new Error('Превышено время ожидания запроса');
+      }
+      
       throw fetchError;
     }
   } catch (error) {
@@ -106,23 +133,31 @@ export async function loadFarmerTips(retries = 2) {
     return {
       "temperature": {
         "hot": {
+          "min": 25,
           "tips": ["Поливайте растения рано утром или вечером", "Используйте мульчу для удержания влаги"]
         },
         "moderate": {
+          "min": 15,
+          "max": 24,
           "tips": ["Идеальное время для обрезки растений", "Проверьте наличие вредителей на растениях"]
         },
         "cold": {
+          "max": 14,
           "tips": ["Защитите растения от заморозков", "Ограничьте полив в холодную погоду"]
         }
       },
       "humidity": {
         "high": {
+          "min": 70,
           "tips": ["Следите за появлением грибковых заболеваний", "Обеспечьте хорошую вентиляцию растений"]
         },
         "normal": {
+          "min": 40,
+          "max": 69,
           "tips": ["Поддерживайте регулярный полив", "Проверьте влажность почвы перед поливом"]
         },
         "low": {
+          "max": 39,
           "tips": ["Увеличьте частоту полива", "Используйте системы капельного орошения"]
         }
       },
