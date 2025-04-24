@@ -524,3 +524,91 @@ html.dark .text-\[76px\] {
     scroll-behavior: auto !important;
   }
 }
+/* Стили для погодных иконок */
+.ios-weather-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: transform 0.2s ease;
+}
+
+.ios-weather-icon svg {
+  overflow: visible;
+}
+
+html.dark .ios-weather-icon {
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
+}
+
+/* Эффект наведения для иконок */
+@media (hover: hover) {
+  .ios-weather-icon:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Анимации для погодных эффектов */
+@keyframes rain-drop {
+  0% { transform: translateY(0); opacity: 0.8; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(10px); opacity: 0; }
+}
+
+@keyframes sun-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes snow-fall {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(10px) rotate(10deg); }
+}
+
+@keyframes cloud-float {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(2px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-rain line {
+  animation: rain-drop 1.5s infinite linear;
+}
+
+.animate-sun circle:first-child {
+  animation: sun-pulse 3s infinite ease-in-out;
+}
+
+.animate-snow circle {
+  animation: snow-fall 3s infinite ease-in-out;
+}
+
+.animate-cloud path {
+  animation: cloud-float 5s infinite ease-in-out;
+}
+
+/* Цвета для градиентов погодных карточек */
+.bg-gradient-sunny {
+  background: linear-gradient(to bottom, #4da0ff, #87bfff);
+}
+
+.bg-gradient-cloudy {
+  background: linear-gradient(to bottom, #8e9eab, #eef2f3);
+}
+
+.bg-gradient-rainy {
+  background: linear-gradient(to bottom, #616161, #9bc5c3);
+}
+
+.bg-gradient-storm {
+  background: linear-gradient(to bottom, #373b44, #4286f4);
+}
+
+.bg-gradient-snow {
+  background: linear-gradient(to bottom, #e6dada, #274046);
+}
+
+.bg-gradient-night {
+  background: linear-gradient(to bottom, #141e30, #243b55);
+}
