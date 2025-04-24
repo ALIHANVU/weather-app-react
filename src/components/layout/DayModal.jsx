@@ -255,7 +255,7 @@ const DayModal = () => {
                                 {['🚿', '🌱', '☂️', '🌡️', '🌿', '🌾', '🍃', '🌸'][index % 8]}
                               </span>
                             </div>
-                            <p className="text-sm font-medium">
+                            <p className="text-sm font-medium overflow-hidden text-ellipsis line-clamp-3">
                               {tip}
                             </p>
                           </motion.div>
