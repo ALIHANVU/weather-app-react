@@ -11,11 +11,12 @@ export default async function handler(req, res) {
   // Добавляем заголовки CORS для возможных запросов с разных доменов
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST,PUT,DELETE');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   
   // Обрабатываем OPTIONS запросы (preflight)
   if (req.method === 'OPTIONS') {
@@ -34,10 +35,15 @@ export default async function handler(req, res) {
     // Создаем URL для запроса геокодирования
     const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(city)}&limit=1&appid=${API_KEY}`;
     
-    console.log('Отправляем запрос к Geo API:', geoUrl);
+    console.log('Отправляем запрос к Geo API');
     
     // Запрашиваем геоданные
-    const geoResponse = await fetch(geoUrl);
+    const geoResponse = await fetch(geoUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
     
     if (!geoResponse.ok) {
       throw new Error(`Ошибка геокодирования: ${geoResponse.status}`);
@@ -52,7 +58,12 @@ export default async function handler(req, res) {
       // Прямой запрос погоды по названию города
       const directWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=ru&appid=${API_KEY}`;
       
-      const weatherResponse = await fetch(directWeatherUrl);
+      const weatherResponse = await fetch(directWeatherUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!weatherResponse.ok) {
         throw new Error(`Город не найден: ${weatherResponse.status}`);
@@ -66,7 +77,12 @@ export default async function handler(req, res) {
       // Получаем прогноз по координатам
       const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${API_KEY}`;
       
-      const forecastResponse = await fetch(forecastUrl);
+      const forecastResponse = await fetch(forecastUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (!forecastResponse.ok) {
         throw new Error(`Ошибка получения прогноза: ${forecastResponse.status}`);
@@ -91,8 +107,18 @@ export default async function handler(req, res) {
     
     // Выполняем параллельные запросы
     const [weatherResponse, forecastResponse] = await Promise.all([
-      fetch(weatherUrl),
-      fetch(forecastUrl)
+      fetch(weatherUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }),
+      fetch(forecastUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
     ]);
     
     if (!weatherResponse.ok) {
