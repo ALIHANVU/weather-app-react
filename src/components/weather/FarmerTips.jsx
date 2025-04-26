@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react'
+import { useState, useEffect, memo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useWeather from '../../hooks/useWeather'
 import { generateFarmerTips } from '../../utils/weatherUtils'
@@ -118,10 +118,17 @@ const TipItem = memo(({ tip, index, onClick, isAnimating }) => {
   // Получаем подходящую иконку для совета
   const icon = getTipIcon(tip);
   
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  
   return (
     <motion.div
       key={index}
-      className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex cursor-pointer will-change-transform"
+      className={`${
+        isDarkMode 
+          ? 'bg-green-900/20 hover:bg-green-900/30' 
+          : 'bg-green-50 hover:bg-green-100'
+      } rounded-xl p-3 flex cursor-pointer will-change-transform`}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
@@ -135,7 +142,9 @@ const TipItem = memo(({ tip, index, onClick, isAnimating }) => {
       onClick={onClick}
       whileHover={{
         y: -2,
-        boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+        boxShadow: isDarkMode 
+          ? "0 4px 8px rgba(0,0,0,0.2)" 
+          : "0 4px 12px rgba(0,0,0,0.08)",
         transition: { duration: 0.2 }
       }}
       whileTap={{
@@ -143,7 +152,11 @@ const TipItem = memo(({ tip, index, onClick, isAnimating }) => {
         transition: { duration: 0.1 }
       }}
     >
-      <div className="w-10 h-10 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
+      <div className={`w-10 h-10 mr-3 flex-shrink-0 ${
+        isDarkMode 
+          ? 'bg-green-800/30' 
+          : 'bg-green-200/80'
+      } flex items-center justify-center rounded-full`}>
         <span className="text-xl">{icon}</span>
       </div>
       <p className="text-sm font-medium leading-tight line-clamp-2 overflow-hidden text-ellipsis">
@@ -165,6 +178,9 @@ const FarmerTips = memo(() => {
   const [tips, setTips] = useState([])
   // Состояние для выбранного совета
   const [selectedTip, setSelectedTip] = useState(null)
+  
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
   
   // Получаем советы при изменении данных о погоде
   useEffect(() => {
@@ -210,7 +226,11 @@ const FarmerTips = memo(() => {
   return (
     <>
       <motion.div
-        className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4 will-change-transform"
+        className={`${
+          isDarkMode 
+            ? 'bg-gray-800' 
+            : 'bg-white'
+        } rounded-2xl shadow-sm p-4 mb-4 will-change-transform`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ 
           opacity: isAnimating ? 0 : 1, 
@@ -223,7 +243,11 @@ const FarmerTips = memo(() => {
         }}
         layoutId="farmer-tips-card"
       >
-        <h2 className="text-xl font-semibold mb-4">Советы для фермеров</h2>
+        <h2 className={`text-xl font-semibold mb-4 ${
+          isDarkMode 
+            ? '' 
+            : 'text-gray-800'
+        }`}>Советы для фермеров</h2>
         
         <div className="grid grid-cols-2 gap-3">
           <AnimatePresence>
@@ -252,7 +276,11 @@ const FarmerTips = memo(() => {
             onClick={() => setSelectedTip(null)}
           >
             <motion.div
-              className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full shadow-lg will-change-transform"
+              className={`${
+                isDarkMode 
+                  ? 'bg-gray-800' 
+                  : 'bg-white'
+              } rounded-3xl max-w-md w-full shadow-lg will-change-transform`}
               initial={{ scale: 0.9, y: 20, opacity: 0 }}
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -265,14 +293,26 @@ const FarmerTips = memo(() => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
-                <div className="w-16 h-16 mb-4 mx-auto bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full">
+                <div className={`w-16 h-16 mb-4 mx-auto ${
+                  isDarkMode 
+                    ? 'bg-green-800/30' 
+                    : 'bg-green-100'
+                } flex items-center justify-center rounded-full`}>
                   <span className="text-3xl">{selectedTip.icon}</span>
                 </div>
-                <p className="text-base font-medium text-center">
+                <p className={`text-base font-medium text-center ${
+                  isDarkMode 
+                    ? 'text-white' 
+                    : 'text-gray-700'
+                }`}>
                   {selectedTip.text}
                 </p>
               </div>
-              <div className="border-t border-gray-200 dark:border-gray-700">
+              <div className={`border-t ${
+                isDarkMode 
+                  ? 'border-gray-700' 
+                  : 'border-gray-200'
+              }`}>
                 <button 
                   onClick={() => setSelectedTip(null)}
                   className="w-full py-3 text-ios-blue font-medium text-center"
