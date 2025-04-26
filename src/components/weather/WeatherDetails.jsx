@@ -4,13 +4,20 @@ import { Wind, Droplets, Eye, Thermometer } from 'lucide-react'
 import useWeather from '../../hooks/useWeather'
 
 /**
- * Оптимизированный компонент элемента деталей
+ * Оптимизированный компонент элемента деталей с улучшенным визуальным стилем
  */
 const DetailItem = memo(({ detail, index, isAnimating }) => {
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div
       key={detail.title}
-      className="bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 flex items-center will-change-transform"
+      className={`${
+        isDarkMode 
+          ? 'bg-gray-700/40 hover:bg-gray-700/60' 
+          : 'bg-blue-50 hover:bg-blue-100'
+      } rounded-xl p-3 flex items-center will-change-transform`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
@@ -30,12 +37,19 @@ const DetailItem = memo(({ detail, index, isAnimating }) => {
         transition: { duration: 0.1 }
       }}
     >
-      <div className="w-10 h-10 mr-3 rounded-full bg-white dark:bg-gray-800 
-                    flex items-center justify-center flex-shrink-0">
+      <div className={`w-10 h-10 mr-3 rounded-full ${
+        isDarkMode 
+          ? 'bg-gray-800 text-white' 
+          : 'bg-white shadow-sm'
+      } flex items-center justify-center flex-shrink-0`}>
         {detail.icon}
       </div>
       <div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+        <div className={`text-xs ${
+          isDarkMode 
+            ? 'text-gray-400' 
+            : 'text-gray-500'
+          } font-medium`}>
           {detail.title.toUpperCase()}
         </div>
         <div className="text-base font-bold">
@@ -49,7 +63,7 @@ const DetailItem = memo(({ detail, index, isAnimating }) => {
 DetailItem.displayName = 'DetailItem'
 
 /**
- * Компонент деталей погоды с оптимизированной производительностью
+ * Компонент деталей погоды с улучшенным визуальным стилем
  */
 const WeatherDetails = memo(() => {
   // Получаем данные о погоде из контекста
@@ -60,33 +74,40 @@ const WeatherDetails = memo(() => {
   
   const { main, visibility, wind } = weatherData.weather
   
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   // Детали погоды
   const details = [
     {
       title: 'Ветер',
       value: `${wind.speed.toFixed(1)} м/с`,
-      icon: <Wind size={22} strokeWidth={1.5} className="text-blue-500" />
+      icon: <Wind size={22} strokeWidth={1.5} className={isDarkMode ? "text-blue-400" : "text-blue-500"} />
     },
     {
       title: 'Влажность',
       value: `${main.humidity}%`,
-      icon: <Droplets size={22} strokeWidth={1.5} className="text-blue-400" />
+      icon: <Droplets size={22} strokeWidth={1.5} className={isDarkMode ? "text-cyan-400" : "text-blue-500"} />
     },
     {
       title: 'Видимость',
       value: `${(visibility / 1000).toFixed(1)} км`,
-      icon: <Eye size={22} strokeWidth={1.5} className="text-indigo-400" />
+      icon: <Eye size={22} strokeWidth={1.5} className={isDarkMode ? "text-indigo-400" : "text-indigo-500"} />
     },
     {
       title: 'Ощущается',
       value: `${Math.round(main.feels_like)}°`,
-      icon: <Thermometer size={22} strokeWidth={1.5} className="text-orange-500" />
+      icon: <Thermometer size={22} strokeWidth={1.5} className={isDarkMode ? "text-orange-400" : "text-orange-500"} />
     }
   ]
   
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4 will-change-transform"
+      className={`${
+        isDarkMode 
+          ? 'bg-gray-800' 
+          : 'bg-white'
+      } rounded-2xl shadow-sm p-4 mb-4 will-change-transform`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
