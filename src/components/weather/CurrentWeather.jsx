@@ -5,7 +5,7 @@ import { isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
 import WeatherIcon from '../shared/WeatherIcon'
 
 /**
- * Компонент текущей погоды с производительными анимациями
+ * Компонент текущей погоды с улучшенными цветами для светлой темы
  * Используем memo для предотвращения ненужных перерисовок
  */
 const CurrentWeather = memo(() => {
@@ -18,38 +18,75 @@ const CurrentWeather = memo(() => {
   const { main, weather, name } = weatherData.weather
   const isExtremeTemp = isExtremeTemperatureForPlants(main.temp)
   
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   // Определяем градиент фона в зависимости от погоды
-  let bgGradient = 'bg-gradient-to-b from-sky-400 to-sky-600'
+  // Используем более яркие и насыщенные цвета для светлой темы
+  let bgGradient = isDarkMode 
+    ? 'bg-gradient-to-b from-sky-400 to-sky-600' 
+    : 'bg-gradient-to-b from-sky-400 to-sky-600';
   
   if (weather && weather[0]) {
     const weatherId = weather[0].id
     const isDaytime = weather[0].icon.includes('d')
     
     if (weatherId >= 200 && weatherId < 300) { // Гроза
-      bgGradient = 'bg-gradient-to-b from-gray-600 to-gray-800'
+      bgGradient = isDarkMode 
+        ? 'bg-gradient-to-b from-gray-600 to-gray-800'
+        : 'bg-gradient-to-b from-indigo-400 to-indigo-600';
     } else if (weatherId >= 300 && weatherId < 400) { // Морось
-      bgGradient = 'bg-gradient-to-b from-sky-300 to-sky-500'
+      bgGradient = isDarkMode 
+        ? 'bg-gradient-to-b from-sky-300 to-sky-500'
+        : 'bg-gradient-to-b from-blue-300 to-blue-500';
     } else if (weatherId >= 500 && weatherId < 600) { // Дождь
-      bgGradient = 'bg-gradient-to-b from-blue-400 to-blue-600'
+      bgGradient = isDarkMode 
+        ? 'bg-gradient-to-b from-blue-400 to-blue-600'
+        : 'bg-gradient-to-b from-blue-400 to-blue-600';
     } else if (weatherId >= 600 && weatherId < 700) { // Снег
-      bgGradient = 'bg-gradient-to-b from-blue-100 to-blue-300'
+      bgGradient = isDarkMode 
+        ? 'bg-gradient-to-b from-blue-100 to-blue-300'
+        : 'bg-gradient-to-b from-cyan-300 to-cyan-500';
     } else if (weatherId >= 700 && weatherId < 800) { // Атмосферные явления
-      bgGradient = 'bg-gradient-to-b from-gray-300 to-gray-500'
+      bgGradient = isDarkMode 
+        ? 'bg-gradient-to-b from-gray-300 to-gray-500'
+        : 'bg-gradient-to-b from-gray-400 to-gray-600';
     } else if (weatherId === 800) { // Ясно
       bgGradient = isDaytime 
-        ? 'bg-gradient-to-b from-sky-400 to-sky-600' 
-        : 'bg-gradient-to-b from-slate-700 to-slate-900'
+        ? (isDarkMode 
+          ? 'bg-gradient-to-b from-sky-400 to-sky-600' 
+          : 'bg-gradient-to-b from-blue-500 to-blue-600')
+        : (isDarkMode 
+          ? 'bg-gradient-to-b from-slate-700 to-slate-900'
+          : 'bg-gradient-to-b from-indigo-600 to-indigo-800');
     } else if (weatherId > 800) { // Облачность
       bgGradient = isDaytime 
-        ? 'bg-gradient-to-b from-sky-300 to-sky-500' 
-        : 'bg-gradient-to-b from-slate-600 to-slate-800'
+        ? (isDarkMode 
+          ? 'bg-gradient-to-b from-sky-300 to-sky-500' 
+          : 'bg-gradient-to-b from-blue-400 to-blue-500')
+        : (isDarkMode 
+          ? 'bg-gradient-to-b from-slate-600 to-slate-800'
+          : 'bg-gradient-to-b from-slate-500 to-slate-700');
+    }
+  }
+  
+  // Добавляем специальные градиенты для экстремальных температур
+  if (isExtremeTemp) {
+    if (main.temp >= 30) { // Слишком жарко
+      bgGradient = isDarkMode
+        ? 'bg-gradient-to-b from-amber-500 to-red-600'
+        : 'bg-gradient-to-b from-orange-400 to-red-500';
+    } else if (main.temp <= 0) { // Слишком холодно
+      bgGradient = isDarkMode
+        ? 'bg-gradient-to-b from-blue-300 to-blue-500'
+        : 'bg-gradient-to-b from-cyan-400 to-blue-600';
     }
   }
   
   return (
     <AnimatePresence mode="wait">
       <motion.div
-        className={`rounded-2xl overflow-hidden shadow-md mb-4 ${bgGradient} will-change-transform`}
+        className={`rounded-2xl overflow-hidden shadow-lg mb-4 ${bgGradient} will-change-transform`}
         initial={{ opacity: 0, scale: 0.96, y: 20 }}
         animate={{ 
           opacity: isAnimating ? 0 : 1, 
@@ -78,7 +115,7 @@ const CurrentWeather = memo(() => {
               <div className="text-2xl font-medium capitalize mb-1">
                 {weather && weather[0] ? weather[0].description.charAt(0).toUpperCase() + weather[0].description.slice(1) : 'Загрузка...'}
               </div>
-              <div className="text-lg opacity-90">
+              <div className="text-lg opacity-95">
                 {Math.round(main.temp_max)}° / {Math.round(main.temp_min)}°
               </div>
             </div>
