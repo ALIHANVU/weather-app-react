@@ -10,10 +10,17 @@ import WeatherIcon from '../shared/WeatherIcon'
  * Оптимизированный компонент деталей для модального окна
  */
 const ModalDetail = memo(({ detail, index }) => {
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div 
       key={detail.title}
-      className="bg-gray-50 dark:bg-gray-700/40 rounded-xl p-3 flex items-center"
+      className={`${
+        isDarkMode 
+          ? 'bg-gray-700/40 hover:bg-gray-700/60' 
+          : 'bg-blue-50 hover:bg-blue-100'
+      } rounded-xl p-3 flex items-center`}
       custom={index}
       initial="hidden"
       animate="visible"
@@ -31,7 +38,9 @@ const ModalDetail = memo(({ detail, index }) => {
         }),
         hover: {
           y: -3,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          boxShadow: isDarkMode 
+            ? "0 4px 12px rgba(0, 0, 0, 0.2)" 
+            : "0 4px 12px rgba(0, 0, 0, 0.1)",
           transition: {
             duration: 0.2
           }
@@ -39,17 +48,28 @@ const ModalDetail = memo(({ detail, index }) => {
       }}
     >
       <motion.div 
-        className="w-8 h-8 mr-3 rounded-full bg-white dark:bg-gray-800 
-                  flex items-center justify-center flex-shrink-0"
+        className={`w-8 h-8 mr-3 rounded-full ${
+          isDarkMode 
+            ? 'bg-gray-800 text-white' 
+            : 'bg-white shadow-sm'
+        } flex items-center justify-center flex-shrink-0`}
         whileHover={{ rotate: [0, -10, 10, -5, 0], transition: { duration: 0.5 } }}
       >
         {detail.icon}
       </motion.div>
       <div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+        <div className={`text-xs ${
+          isDarkMode 
+            ? 'text-gray-400' 
+            : 'text-gray-500'
+          } font-medium`}>
           {detail.title}
         </div>
-        <div className="text-base font-bold">
+        <div className={`text-base font-bold ${
+          isDarkMode 
+            ? '' 
+            : 'text-blue-700'
+        }`}>
           {detail.value}
         </div>
       </div>
@@ -63,10 +83,17 @@ ModalDetail.displayName = 'ModalDetail'
  * Оптимизированный элемент часового прогноза
  */
 const HourlyItem = memo(({ item, index, formatTime }) => {
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div 
       key={index} 
-      className="flex flex-col items-center min-w-16 mx-2"
+      className={`flex flex-col items-center min-w-16 mx-2 ${
+        isDarkMode 
+          ? 'hover:bg-gray-700/20' 
+          : 'hover:bg-blue-50'
+      } px-2 py-2 rounded-xl transition-colors`}
       custom={index}
       initial="hidden"
       animate="visible"
@@ -87,7 +114,11 @@ const HourlyItem = memo(({ item, index, formatTime }) => {
         transition: { duration: 0.2 } 
       }}
     >
-      <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+      <div className={`text-sm mb-2 font-medium ${
+        isDarkMode 
+          ? 'text-gray-400' 
+          : 'text-gray-500'
+      }`}>
         {formatTime(item.dt)}
       </div>
       <motion.div 
@@ -102,7 +133,11 @@ const HourlyItem = memo(({ item, index, formatTime }) => {
           size={34} 
         />
       </motion.div>
-      <div className="font-bold text-lg">
+      <div className={`font-bold text-lg ${
+        isDarkMode 
+          ? '' 
+          : 'text-blue-600'
+      }`}>
         {Math.round(item.main.temp)}°
       </div>
     </motion.div>
@@ -115,10 +150,17 @@ HourlyItem.displayName = 'HourlyItem'
  * Оптимизированный элемент совета
  */
 const TipItem = memo(({ tip, index, icon }) => {
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div
       key={index}
-      className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3 flex"
+      className={`${
+        isDarkMode 
+          ? 'bg-green-900/20 hover:bg-green-900/30' 
+          : 'bg-green-50 hover:bg-green-100'
+      } rounded-xl p-3 flex`}
       custom={index}
       initial="hidden"
       animate="visible"
@@ -136,18 +178,28 @@ const TipItem = memo(({ tip, index, icon }) => {
       }}
       whileHover={{ 
         x: 3, 
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+        boxShadow: isDarkMode 
+          ? "0 4px 12px rgba(0, 0, 0, 0.2)" 
+          : "0 4px 12px rgba(0, 0, 0, 0.08)",
         transition: { duration: 0.2 } 
       }}
     >
       <motion.div 
-        className="w-9 h-9 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800/30 flex items-center justify-center rounded-full"
+        className={`w-9 h-9 mr-3 flex-shrink-0 ${
+          isDarkMode 
+            ? 'bg-green-800/30' 
+            : 'bg-green-200/80'
+        } flex items-center justify-center rounded-full`}
         whileHover={{ rotate: 10, scale: 1.1 }}
         transition={{ type: "spring", stiffness: 300, damping: 10 }}
       >
         <span className="text-lg">{icon}</span>
       </motion.div>
-      <p className="text-sm font-medium overflow-hidden text-ellipsis line-clamp-3">
+      <p className={`text-sm font-medium overflow-hidden text-ellipsis line-clamp-3 ${
+        isDarkMode 
+          ? '' 
+          : 'text-gray-700'
+      }`}>
         {tip}
       </p>
     </motion.div>
@@ -168,6 +220,9 @@ const DayModal = () => {
   const [tips, setTips] = useState([])
   // Проверка первого рендера для задержки анимации
   const [hasAnimated, setHasAnimated] = useState(false)
+  
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
   
   // Функция для получения иконки для совета
   const getTipIcon = useCallback((tip) => {
@@ -284,22 +339,22 @@ const DayModal = () => {
     {
       title: 'ВЕТЕР',
       value: `${avgWindSpeed} м/с`,
-      icon: <Wind size={18} strokeWidth={1.5} className="text-blue-500" />
+      icon: <Wind size={18} strokeWidth={1.5} className={isDarkMode ? "text-blue-500" : "text-blue-600"} />
     },
     {
       title: 'ВЛАЖНОСТЬ',
       value: `${avgHumidity}%`,
-      icon: <Droplets size={18} strokeWidth={1.5} className="text-blue-400" />
+      icon: <Droplets size={18} strokeWidth={1.5} className={isDarkMode ? "text-blue-400" : "text-blue-500"} />
     },
     {
       title: 'ВИДИМОСТЬ',
       value: `${avgVisibility} км`,
-      icon: <Eye size={18} strokeWidth={1.5} className="text-indigo-400" />
+      icon: <Eye size={18} strokeWidth={1.5} className={isDarkMode ? "text-indigo-400" : "text-indigo-500"} />
     },
     {
       title: 'ОЩУЩАЕТСЯ',
       value: `${avgFeelsLike}°`,
-      icon: <Thermometer size={18} strokeWidth={1.5} className="text-orange-500" />
+      icon: <Thermometer size={18} strokeWidth={1.5} className={isDarkMode ? "text-orange-500" : "text-orange-600"} />
     }
   ]
   
@@ -354,6 +409,15 @@ const DayModal = () => {
     }
   }
   
+  // Определяем цвета градиента для заголовка
+  const headerGradient = isExtremeTemp 
+    ? (isDarkMode 
+        ? 'bg-gradient-to-r from-amber-500 to-red-600'
+        : 'bg-gradient-to-r from-orange-400 to-red-500')
+    : (isDarkMode 
+        ? 'bg-gradient-to-r from-blue-400 to-indigo-500'
+        : 'bg-gradient-to-r from-blue-500 to-indigo-500')
+  
   return (
     <AnimatePresence mode="wait">
       {modalVisible && (
@@ -369,7 +433,11 @@ const DayModal = () => {
           layoutId="modal-overlay"
         >
           <motion.div
-            className="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full max-h-[90vh] overflow-auto shadow-lg will-change-transform"
+            className={`${
+              isDarkMode 
+                ? 'bg-gray-800' 
+                : 'bg-white'
+            } rounded-3xl max-w-md w-full max-h-[90vh] overflow-auto shadow-lg will-change-transform`}
             initial="hidden"
             animate="visible"
             exit="exit"
@@ -380,7 +448,7 @@ const DayModal = () => {
             <div className="relative">
               {/* Градиентный фон для заголовка */}
               <motion.div 
-                className={`rounded-t-3xl p-6 ${isExtremeTemp ? 'bg-gradient-to-r from-orange-400 to-red-500' : 'bg-gradient-to-r from-blue-400 to-indigo-500'}`}
+                className={`rounded-t-3xl p-6 ${headerGradient}`}
                 initial={{ opacity: 0.8 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5 }}
@@ -469,7 +537,11 @@ const DayModal = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.15 }}
                 >
-                  <h3 className="text-lg font-semibold mb-3">Детали</h3>
+                  <h3 className={`text-lg font-semibold mb-3 ${
+                    isDarkMode 
+                      ? '' 
+                      : 'text-gray-800'
+                  }`}>Детали</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {details.map((detail, index) => (
                       <ModalDetail 
@@ -488,7 +560,11 @@ const DayModal = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.2 }}
                 >
-                  <h3 className="text-lg font-semibold mb-3">Прогноз по часам</h3>
+                  <h3 className={`text-lg font-semibold mb-3 ${
+                    isDarkMode 
+                      ? '' 
+                      : 'text-gray-800'
+                  }`}>Прогноз по часам</h3>
                   <div className="flex overflow-x-auto pb-3 pt-1 -mx-2 px-2 scrollbar-hide">
                     {selectedDayData.hourlyData.map((item, index) => (
                       <HourlyItem 
@@ -507,7 +583,11 @@ const DayModal = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.25 }}
                 >
-                  <h3 className="text-lg font-semibold mb-3">Советы для фермеров</h3>
+                  <h3 className={`text-lg font-semibold mb-3 ${
+                    isDarkMode 
+                      ? '' 
+                      : 'text-gray-800'
+                  }`}>Советы для фермеров</h3>
                   
                   <div className="space-y-2.5">
                     <AnimatePresence>
@@ -522,7 +602,11 @@ const DayModal = () => {
                         ))
                       ) : (
                         <motion.div 
-                          className="p-4 text-center text-gray-500 dark:text-gray-400"
+                          className={`p-4 text-center ${
+                            isDarkMode 
+                              ? 'text-gray-400' 
+                              : 'text-gray-500'
+                          }`}
                           initial={{ opacity: 0 }}
                           animate={{ 
                             opacity: [0, 0.5, 1, 0.5, 0], 
