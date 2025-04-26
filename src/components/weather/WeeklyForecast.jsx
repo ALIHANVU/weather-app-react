@@ -31,11 +31,15 @@ const DayItem = memo(({ day, index, isAnimating, onClick }) => {
     })
   }
   
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div
       key={day.date}
-      className="flex items-center justify-between py-3 border-b border-gray-100 
-                dark:border-gray-700 last:border-0 cursor-pointer will-change-transform"
+      className={`flex items-center justify-between py-3 border-b 
+                ${isDarkMode ? 'border-gray-700 hover:bg-gray-700/30' : 'border-gray-100 hover:bg-blue-50/50'} 
+                last:border-0 cursor-pointer px-2 rounded-lg transition-colors will-change-transform`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
@@ -56,7 +60,7 @@ const DayItem = memo(({ day, index, isAnimating, onClick }) => {
         transition: { duration: 0.1 }
       }}
     >
-      <div className="text-base font-medium">
+      <div className={`text-base font-medium ${isDarkMode ? '' : 'text-gray-700'}`}>
         {index === 0 ? 'Сегодня' : day.day}
       </div>
       
@@ -64,7 +68,7 @@ const DayItem = memo(({ day, index, isAnimating, onClick }) => {
         <div className="mr-4">
           <WeatherIcon iconCode={mostFrequentIcon} size={38} />
         </div>
-        <div className="text-base font-bold w-12 text-right">
+        <div className={`text-base font-bold w-12 text-right ${isDarkMode ? '' : 'text-blue-600'}`}>
           {avgTemp}°C
         </div>
       </div>
@@ -76,6 +80,7 @@ DayItem.displayName = 'DayItem'
 
 /**
  * Компонент прогноза на неделю с оптимизированной производительностью
+ * и улучшенными стилями для светлого режима
  */
 const WeeklyForecast = memo(() => {
   // Получаем данные о погоде и функцию открытия модального окна из контекста
@@ -92,9 +97,12 @@ const WeeklyForecast = memo(() => {
   // Если нет данных или прогноза, не рендерим компонент
   if (!weatherData || !weatherData.forecast || dailyForecast.length === 0) return null
   
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 will-change-transform"
+      className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-2xl shadow-sm p-4 will-change-transform`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
@@ -107,7 +115,9 @@ const WeeklyForecast = memo(() => {
       }}
       layoutId="weekly-forecast-card"
     >
-      <h2 className="text-xl font-semibold mb-4">Прогноз на 7 дней</h2>
+      <h2 className={`text-xl font-semibold mb-4 ${isDarkMode ? '' : 'text-gray-800'}`}>
+        Прогноз на 7 дней
+      </h2>
       
       <div className="flex flex-col">
         {dailyForecast.map((day, index) => (
