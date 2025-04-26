@@ -103,19 +103,19 @@ const CurrentWeather = memo(() => {
       >
         <div className="p-6 text-white">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-semibold">{currentCity || name}</h1>
+            <h1 className="text-3xl font-semibold text-white">{currentCity || name}</h1>
             <div className="scale-125 origin-center transform-gpu">
               <WeatherIcon iconCode={weather && weather[0] ? weather[0].icon : '01d'} size={130} />
             </div>
           </div>
           
           <div className="flex items-end">
-            <div className="text-8xl font-light leading-none will-change-contents">{Math.round(main.temp)}°</div>
+            <div className="text-8xl font-light leading-none will-change-contents text-white">{Math.round(main.temp)}°</div>
             <div className="ml-4 mb-3">
-              <div className="text-2xl font-medium capitalize mb-1">
+              <div className="text-2xl font-medium capitalize mb-1 text-white">
                 {weather && weather[0] ? weather[0].description.charAt(0).toUpperCase() + weather[0].description.slice(1) : 'Загрузка...'}
               </div>
-              <div className="text-lg opacity-95">
+              <div className="text-lg opacity-95 text-white">
                 {Math.round(main.temp_max)}° / {Math.round(main.temp_min)}°
               </div>
             </div>
