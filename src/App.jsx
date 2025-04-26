@@ -1,7 +1,4 @@
-// Оптимизированный файл src/App.jsx
-// Улучшает производительность рендеринга на Android устройствах
-
-import { useState, useEffect, lazy, Suspense, useCallback, memo } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { WeatherProvider } from './contexts/WeatherContext'
 import SearchSection from './components/layout/SearchSection'
 import LoadingSpinner from './components/shared/LoadingSpinner'
@@ -9,7 +6,7 @@ import ErrorNotification from './components/shared/ErrorNotification'
 import DarkModeEnforcer from './components/shared/DarkModeEnforcer'
 import WeatherIcon from './components/shared/WeatherIcon'
 
-// Оптимизация 1: Более эффективная ленивая загрузка компонентов с предзагрузкой
+// Ленивая загрузка компонентов
 const CurrentWeather = lazy(() => import('./components/weather/CurrentWeather'));
 const HourlyForecast = lazy(() => import('./components/weather/HourlyForecast'));
 const WeatherDetails = lazy(() => import('./components/weather/WeatherDetails'));
@@ -17,38 +14,8 @@ const FarmerTips = lazy(() => import('./components/weather/FarmerTips'));
 const WeeklyForecast = lazy(() => import('./components/weather/WeeklyForecast'));
 const DayModal = lazy(() => import('./components/layout/DayModal'));
 
-// Оптимизация 2: Предзагрузка модулей для улучшения отзывчивости
-// Предзагружаем модули после инициализации приложения
-const preloadComponents = () => {
-  const preload = () => {
-    // Начинаем предзагрузку через 2 секунды после запуска приложения
-    const timer = setTimeout(() => {
-      import('./components/weather/CurrentWeather');
-      import('./components/weather/HourlyForecast');
-      // Остальные компоненты загружаем с задержкой
-      setTimeout(() => {
-        import('./components/weather/WeatherDetails');
-        import('./components/weather/FarmerTips');
-        import('./components/weather/WeeklyForecast');
-        import('./components/layout/DayModal');
-      }, 1000);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  };
-  
-  if (typeof window !== 'undefined') {
-    if (document.readyState === 'complete') {
-      preload();
-    } else {
-      window.addEventListener('load', preload);
-      return () => window.removeEventListener('load', preload);
-    }
-  }
-};
-
-// Оптимизация 3: Мемоизированный компонент для заглушки
-const PlaceholderContent = memo(({ onLoadMoscow }) => (
+// Компонент для отображения заглушки
+const PlaceholderContent = ({ onLoadMoscow }) => (
   <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center mt-8 shadow-sm">
     <div className="flex justify-center mb-4">
       <WeatherIcon iconCode="01d" size={80} />
@@ -63,12 +30,10 @@ const PlaceholderContent = memo(({ onLoadMoscow }) => (
       Загрузить для Москвы
     </button>
   </div>
-));
+);
 
-PlaceholderContent.displayName = 'PlaceholderContent';
-
-// Оптимизация 4: Мемоизированный компонент для отладки
-const DebugInfo = memo(({ error, isVisible }) => {
+// Компонент для отладки
+const DebugInfo = ({ error, isVisible }) => {
   if (!isVisible) return null;
   
   return (
@@ -76,60 +41,41 @@ const DebugInfo = memo(({ error, isVisible }) => {
       <pre>{error || 'Нет ошибок'}</pre>
     </div>
   );
-});
+};
 
-DebugInfo.displayName = 'DebugInfo';
-
-// Оптимизация 5: Мемоизированный основной компонент
 function App() {
-  // Оптимизация 6: Используем useRef для состояний, которые не требуют перерисовки
+  // Состояние для темной темы
   const [darkMode, setDarkMode] = useState(false)
+  // Состояние для отображения результатов погоды
   const [showWeather, setShowWeather] = useState(false)
+  // Состояние для отображения ошибки
   const [error, setError] = useState(null)
+  // Состояние для отображения загрузки
   const [loading, setLoading] = useState(false)
+  // Состояние для отображения отладочной информации
   const [showDebug, setShowDebug] = useState(false)
+  // Состояние для начальной загрузки приложения
   const [initialLoading, setInitialLoading] = useState(true)
 
-  // Оптимизация 7: Мемоизированная функция для загрузки погоды Москвы
-  const loadMoscowWeather = useCallback(() => {
+  // Функция для загрузки погоды Москвы
+  const loadMoscowWeather = () => {
     const weatherContext = document.getElementById('root')?.__WEATHER_CONTEXT__;
     if (weatherContext && weatherContext.loadWeatherData) {
       weatherContext.loadWeatherData('Москва');
     }
-  }, []);
+  };
 
-  // Оптимизация 8: Запускаем предзагрузку компонентов
+  // Эффект для имитации начальной загрузки приложения
   useEffect(() => {
-    preloadComponents();
-  }, []);
-
-  // Оптимизация 9: Улучшенный эффект для имитации начальной загрузки
-  useEffect(() => {
-    // Проверяем производительность устройства
-    const isLowEndDevice = () => {
-      // Проверка на Android
-      const isAndroid = /Android/.test(navigator.userAgent);
-      // Проверка количества логических процессоров (если доступно)
-      const hasLowCPU = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
-      // Проверка утечки памяти (на грубом уровне)
-      const hasLowMemory = !window.performance || 
-                         (window.performance.memory && 
-                          window.performance.memory.jsHeapSizeLimit < 2147483648); // 2GB
-      
-      return isAndroid && (hasLowCPU || hasLowMemory);
-    };
-    
-    // Адаптируем время загрузки в зависимости от устройства
-    const loadTime = isLowEndDevice() ? 500 : 1000;
-    
+    // Имитируем загрузку приложения
     const timer = setTimeout(() => {
       setInitialLoading(false);
-    }, loadTime);
+    }, 1000); // Задержка в 1 секунду для отображения начального спиннера
     
     return () => clearTimeout(timer);
   }, []);
 
-  // Оптимизация 10: Объединение эффектов для темной темы
+  // Эффект для определения предпочтений темной темы
   useEffect(() => {
     // Проверяем предпочтения системы по темной теме
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -139,13 +85,6 @@ function App() {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     
     const handleChange = (e) => setDarkMode(e.matches)
-    
-    // Применяем тему к документу
-    if (prefersDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
     
     // Используем правильный API в зависимости от поддержки браузера
     try {
@@ -157,59 +96,41 @@ function App() {
       mediaQuery.addListener(handleChange)
       return () => mediaQuery.removeListener(handleChange)
     }
-  }, []);
+  }, [])
 
-  // Оптимизация 11: Синхронизируем класс темной темы при изменении состояния
+  // Применяем класс темной темы к body
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-  }, [darkMode]);
+  }, [darkMode])
 
-  // Оптимизация 12: Улучшенный обработчик отладки
+  // Включаем режим отладки при 3-х быстрых нажатиях на заголовок
   useEffect(() => {
     let clickCount = 0;
     let clickTimer = null;
-    let lastClickTime = 0;
 
     const handleClick = () => {
-      const now = Date.now();
-      
-      // Сбрасываем счетчик, если между кликами прошло больше 500 мс
-      if (now - lastClickTime > 500) {
-        clickCount = 0;
-      }
-      
       clickCount++;
-      lastClickTime = now;
       
-      clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => {
-        clickCount = 0;
-      }, 500);
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => {
+          clickCount = 0;
+        }, 500);
+      }
 
       if (clickCount >= 3) {
-        setShowDebug(prev => !prev);
+        clearTimeout(clickTimer);
         clickCount = 0;
+        setShowDebug(prev => !prev);
       }
     };
 
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
-
-  // Оптимизация 13: Учитываем особенности рендеринга для Android
-  const isAndroid = typeof navigator !== 'undefined' && /Android/.test(navigator.userAgent);
-  
-  // Оптимизация 14: Уменьшаем число эффектов трансформации для Android
-  const transitionStyle = isAndroid ? {
-    opacity: showWeather ? 1 : 0
-  } : {
-    opacity: showWeather ? 1 : 0,
-    transform: showWeather ? 'translateY(0)' : 'translateY(10px)'
-  };
 
   return (
     <>
@@ -227,19 +148,16 @@ function App() {
             {/* Секция поиска */}
             <SearchSection />
 
-            {/* Основной контент с оптимизированным Suspense */}
-            <Suspense fallback={
-              <div className={`animate-pulse h-96 bg-gray-100 dark:bg-gray-800 rounded-2xl mt-4 ${
-                isAndroid ? 'will-change-auto' : 'will-change-transform'
-              }`}></div>
-            }>
+            {/* Основной контент */}
+            <Suspense fallback={<div className="animate-pulse h-96 bg-gray-100 dark:bg-gray-800 rounded-2xl mt-4"></div>}>
               {showWeather ? (
                 <div 
                   id="weatherResult"
-                  className={`transition-all duration-400 ${
-                    isAndroid ? 'will-change-auto' : 'will-change-transform'
-                  }`}
-                  style={transitionStyle}
+                  className="transition-all duration-400 transform will-change-transform"
+                  style={{ 
+                    opacity: showWeather ? 1 : 0,
+                    transform: showWeather ? 'translateY(0)' : 'translateY(10px)'
+                  }}
                 >
                   {/* Основные компоненты для погоды */}
                   <CurrentWeather />
@@ -254,7 +172,7 @@ function App() {
             </Suspense>
           </div>
 
-          {/* Модальное окно с деталями дня - ленивая загрузка */}
+          {/* Модальное окно с деталями дня */}
           <Suspense fallback={null}>
             <DayModal />
           </Suspense>
@@ -273,55 +191,4 @@ function App() {
   )
 }
 
-export default App;
-
-/*
-СПИСОК ДАЛЬНЕЙШИХ ОПТИМИЗАЦИЙ:
-
-1. Оптимизация CSS:
-   - Создать отдельный CSS файл для Android: src/index.android.css
-   - Уменьшить количество CSS-свойств, вызывающих перекомпоновку (особенно transform, box-shadow)
-   - Подключить файл условно через useEffect на основе User-Agent
-
-2. Оптимизация анимаций:
-   - В файле src/components/weather/CurrentWeather.jsx:
-     - Добавить проверку isAndroid и упростить анимацию для Android
-     - Использовать transform: translateZ(0) для принудительного использования GPU
-   - В файле src/components/weather/WeeklyForecast.jsx:
-     - Снизить количество анимированных элементов
-   - В файле src/components/weather/FarmerTips.jsx:
-     - Добавить условную логику для анимаций на Android
-
-3. Оптимизация контекста:
-   - В файле src/contexts/WeatherContext.jsx:
-     - Разделить контекст на несколько мелких для снижения перерисовок
-     - Использовать useReducer вместо множества useState
-     - Оптимизировать логику загрузки данных
-
-4. Оптимизация компонентов:
-   - В файле src/components/layout/DayModal.jsx:
-     - Снизить количество анимационных эффектов
-     - Разделить внутренние компоненты на более мелкие и мемоизировать их
-   - В файле src/components/shared/WeatherIcon.jsx:
-     - Предварительно загружать SVG иконки
-     - Возможно заменить на PNG для Android с низкой производительностью
-
-5. Оптимизация HTTP запросов:
-   - В файле src/utils/api.js:
-     - Добавить агрессивное кеширование запросов
-     - Использовать сжатие данных, если возможно
-
-6. Общая оптимизация:
-   - Удалить все неиспользуемые зависимости
-   - Настроить webpack для создания отдельных бандлов для разных платформ
-   - Использовать нативные элементы вместо сложных React-компонентов на слабых устройствах
-
-7. Служебные рабочие для кеширования:
-   - Добавить service worker для кеширования данных о погоде
-   - Добавить агрессивное кеширование статических ресурсов
-
-8. Оптимизация рендеринга:
-   - Добавить throttling для событий скролла
-   - Использовать requestAnimationFrame для анимаций вместо CSS transitions
-   - Реализовать виртуализацию списков для компонентов с большим количеством элементов
-
+export default App
