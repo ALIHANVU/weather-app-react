@@ -5,13 +5,20 @@ import useWeather from '../../hooks/useWeather'
 import WeatherIcon from '../shared/WeatherIcon'
 
 /**
- * Оптимизированный элемент почасового прогноза
+ * Оптимизированный элемент почасового прогноза с улучшенным визуальным стилем
  */
 const HourlyItem = memo(({ item, index, isFirst, isAnimating }) => {
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   return (
     <motion.div
       key={item.dt}
-      className="flex flex-col items-center min-w-16 mx-1 will-change-transform"
+      className={`flex flex-col items-center min-w-16 mx-1 ${
+        isDarkMode 
+          ? 'hover:bg-gray-700/20' 
+          : 'hover:bg-blue-50'
+      } px-2 py-2 rounded-xl transition-colors will-change-transform`}
       initial={{ opacity: 0, y: 15 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
@@ -22,8 +29,16 @@ const HourlyItem = memo(({ item, index, isFirst, isAnimating }) => {
         delay: index * 0.03,
         ease: "easeOut"
       }}
+      whileHover={{
+        y: -2,
+        transition: { duration: 0.2 }
+      }}
     >
-      <div className="text-gray-500 dark:text-gray-400 text-sm mb-2 font-medium">
+      <div className={`text-sm mb-2 font-medium ${
+        isDarkMode 
+          ? 'text-gray-400' 
+          : 'text-gray-500'
+      }`}>
         {isFirst ? 'Сейчас' : formatTime(item.dt)}
       </div>
       <div className="mb-2">
@@ -32,7 +47,11 @@ const HourlyItem = memo(({ item, index, isFirst, isAnimating }) => {
           size={38} 
         />
       </div>
-      <div className="font-bold text-lg">
+      <div className={`font-bold text-lg ${
+        isDarkMode 
+          ? '' 
+          : 'text-blue-600'
+      }`}>
         {Math.round(item.main.temp)}°
       </div>
     </motion.div>
@@ -42,7 +61,7 @@ const HourlyItem = memo(({ item, index, isFirst, isAnimating }) => {
 HourlyItem.displayName = 'HourlyItem'
 
 /**
- * Компонент почасового прогноза с оптимизацией производительности
+ * Компонент почасового прогноза с улучшенным визуальным стилем
  */
 const HourlyForecast = memo(() => {
   // Получаем данные о погоде из контекста
@@ -51,12 +70,19 @@ const HourlyForecast = memo(() => {
   // Если нет данных, не рендерим компонент
   if (!weatherData || !weatherData.forecast) return null
   
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
+  
   // Ограничиваем количество отображаемых часов
   const hourlyData = weatherData.forecast.list.slice(0, 24)
   
   return (
     <motion.div
-      className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-4 mb-4 will-change-transform"
+      className={`${
+        isDarkMode 
+          ? 'bg-gray-800' 
+          : 'bg-white'
+      } rounded-2xl shadow-sm p-4 mb-4 will-change-transform`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ 
         opacity: isAnimating ? 0 : 1, 
