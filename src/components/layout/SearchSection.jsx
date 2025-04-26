@@ -5,6 +5,7 @@ import useWeather from '../../hooks/useWeather'
 
 /**
  * Компонент секции поиска с оптимизированной производительностью
+ * и улучшенными стилями для светлого режима
  * 
  * @returns {JSX.Element}
  */
@@ -15,6 +16,9 @@ const SearchSection = memo(() => {
   const { handleSearch, isAnimating } = useWeather()
   // Ссылка на кнопку для анимации
   const buttonRef = useRef(null)
+  
+  // Определяем, находимся ли мы в темном режиме
+  const isDarkMode = document.documentElement.classList.contains('dark')
   
   // Обработчик отправки формы
   const handleSubmit = (e) => {
@@ -67,9 +71,13 @@ const SearchSection = memo(() => {
           placeholder="Поиск города"
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
-          className="w-full bg-gray-100 dark:bg-gray-700 py-3 pl-11 pr-4 rounded-xl 
-                   focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
-                   will-change-transform placeholder:text-gray-400"
+          className={`w-full ${
+            isDarkMode 
+              ? 'bg-gray-700 focus:ring-blue-500' 
+              : 'bg-gray-100 focus:ring-blue-400 text-gray-800'
+          } py-3 pl-11 pr-4 rounded-xl 
+            focus:outline-none focus:ring-2 transition-all
+            will-change-transform placeholder:text-gray-400`}
           autoComplete="off"
           disabled={isAnimating}
           enterKeyHint="search"
@@ -78,9 +86,14 @@ const SearchSection = memo(() => {
         <button
           ref={buttonRef}
           type="submit"
-          className="absolute right-3 top-1/2 transform -translate-y-1/2
-                   bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-full
-                   text-sm font-medium transition-transform duration-150 will-change-transform"
+          className={`absolute right-3 top-1/2 transform -translate-y-1/2
+                ${
+                  isDarkMode
+                    ? 'bg-blue-500 hover:bg-blue-600' 
+                    : 'bg-blue-500 hover:bg-blue-600'
+                } text-white px-4 py-1.5 rounded-full
+                text-sm font-medium transition-transform duration-150 will-change-transform
+                shadow-sm hover:shadow`}
           disabled={isAnimating}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
