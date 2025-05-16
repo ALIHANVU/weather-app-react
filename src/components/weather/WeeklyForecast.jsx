@@ -1,6 +1,6 @@
 import { useMemo, memo } from 'react'
 import { motion } from 'framer-motion'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ThermometerSun, ThermometerSnowflake } from 'lucide-react'
 import useWeather from '../../hooks/useWeather'
 import { groupForecastByDays } from '../../utils/weatherUtils'
 import { isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
@@ -9,7 +9,7 @@ import WeatherIcon from '../shared/WeatherIcon'
 /**
  * Оптимизированный компонент элемента прогноза на день
  */
-const DayItem = memo(({ day, index, isAnimating, onClick, hasExtremeTempWarning }) => {
+const DayItem = memo(({ day, index, isAnimating, onClick, extremeTempType }) => {
   // Рассчитываем среднюю температуру
   const avgTemp = Math.round(day.temps.reduce((a, b) => a + b, 0) / day.temps.length)
   
@@ -62,20 +62,36 @@ const DayItem = memo(({ day, index, isAnimating, onClick, hasExtremeTempWarning 
         transition: { duration: 0.1 }
       }}
     >
-      <div className="flex items-center">
+      <div className="flex items-center space-x-2">
         <div className={`text-base font-medium ${isDarkMode ? '' : 'text-gray-700'}`}>
           {index === 0 ? 'Сегодня' : day.day}
         </div>
-        {hasExtremeTempWarning && (
+        
+        {extremeTempType === 'hot' && (
           <div 
-            className={`ml-2 flex items-center ${
+            className={`flex items-center space-x-1 ${
               isDarkMode 
-                ? 'text-red-400' 
-                : 'text-red-600'
+                ? 'text-orange-400' 
+                : 'text-orange-600'
             }`}
-            title="Экстремальная температура для растений"
+            title="Экстремально высокая температура"
           >
-            <AlertTriangle size={18} strokeWidth={2.5} className="animate-pulse" />
+            <ThermometerSun size={18} strokeWidth={2.5} className="animate-pulse" />
+            <span className="text-xs font-medium">Жара</span>
+          </div>
+        )}
+        
+        {extremeTempType === 'cold' && (
+          <div 
+            className={`flex items-center space-x-1 ${
+              isDarkMode 
+                ? 'text-blue-400' 
+                : 'text-blue-600'
+            }`}
+            title="Экстремально низкая температура"
+          >
+            <ThermometerSnowflake size={18} strokeWidth={2.5} className="animate-pulse" />
+            <span className="text-xs font-medium">Холод</span>
           </div>
         )}
       </div>
@@ -111,12 +127,19 @@ const WeeklyForecast = memo(() => {
   }, [weatherData])
   
   // Проверяем наличие экстремальных температур
-  const daysWithExtremeTempWarnings = useMemo(() => {
+  const daysWithExtremeTempInfo = useMemo(() => {
     return dailyForecast.map(day => {
       const avgTemp = day.temps.reduce((a, b) => a + b, 0) / day.temps.length
-      return isExtremeTemperatureForPlants(avgTemp)
+      
+      if (avgTemp >= 30) return 'hot'
+      if (avgTemp <= 0) return 'cold'
+      
+      return null
     })
   }, [dailyForecast])
+  
+  // Определяем наличие экстремальной температуры
+  const hasExtremeTempWarning = daysWithExtremeTempInfo.some(info => info !== null)
   
   // Если нет данных или прогноза, не рендерим компонент
   if (!weatherData || !weatherData.forecast || dailyForecast.length === 0) return null
@@ -143,17 +166,18 @@ const WeeklyForecast = memo(() => {
         <h2 className={`text-xl font-semibold ${isDarkMode ? '' : 'text-gray-800'}`}>
           Прогноз на 7 дней
         </h2>
-        {daysWithExtremeTempWarnings.some(Boolean) && (
+        
+        {hasExtremeTempWarning && (
           <div 
-            className={`flex items-center text-sm ${
+            className={`flex items-center space-x-1 text-sm ${
               isDarkMode 
                 ? 'text-red-400' 
                 : 'text-red-600'
             }`}
             title="Обратите внимание: некоторые дни имеют экстремальную температуру для растений"
           >
-            <AlertTriangle size={16} strokeWidth={2} className="mr-1 animate-pulse" />
-            Экстремальная погода
+            <AlertTriangle size={16} strokeWidth={2} className="animate-pulse" />
+            <span>Экстремальная температура</span>
           </div>
         )}
       </div>
@@ -166,7 +190,7 @@ const WeeklyForecast = memo(() => {
             index={index}
             isAnimating={isAnimating}
             onClick={() => openDayModal(day)}
-            hasExtremeTempWarning={daysWithExtremeTempWarnings[index]}
+            extremeTempType={daysWithExtremeTempInfo[index]}
           />
         ))}
       </div>
