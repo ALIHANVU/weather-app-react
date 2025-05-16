@@ -2,7 +2,8 @@ import { useMemo, memo } from 'react'
 import { motion } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
 import useWeather from '../../hooks/useWeather'
-import { groupForecastByDays, isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
+import { groupForecastByDays } from '../../utils/weatherUtils'
+import { isExtremeTemperatureForPlants } from '../../utils/weatherUtils'
 import WeatherIcon from '../shared/WeatherIcon'
 
 /**
@@ -67,14 +68,14 @@ const DayItem = memo(({ day, index, isAnimating, onClick, hasExtremeTempWarning 
         </div>
         {hasExtremeTempWarning && (
           <div 
-            className={`ml-2 ${
+            className={`ml-2 flex items-center ${
               isDarkMode 
-                ? 'text-yellow-400' 
-                : 'text-yellow-600'
-            } flex items-center`}
+                ? 'text-red-400' 
+                : 'text-red-600'
+            }`}
             title="Экстремальная температура для растений"
           >
-            <AlertTriangle size={16} strokeWidth={2} />
+            <AlertTriangle size={18} strokeWidth={2.5} className="animate-pulse" />
           </div>
         )}
       </div>
@@ -146,12 +147,12 @@ const WeeklyForecast = memo(() => {
           <div 
             className={`flex items-center text-sm ${
               isDarkMode 
-                ? 'text-yellow-400' 
-                : 'text-yellow-600'
+                ? 'text-red-400' 
+                : 'text-red-600'
             }`}
             title="Обратите внимание: некоторые дни имеют экстремальную температуру для растений"
           >
-            <AlertTriangle size={16} strokeWidth={2} className="mr-1" />
+            <AlertTriangle size={16} strokeWidth={2} className="mr-1 animate-pulse" />
             Экстремальная погода
           </div>
         )}
