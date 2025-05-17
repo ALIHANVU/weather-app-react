@@ -2,72 +2,53 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react({
-      babel: {
-        plugins: [
-          'babel-plugin-transform-react-remove-prop-types',
-          '@babel/plugin-transform-react-constant-elements',
-          '@babel/plugin-transform-react-inline-elements'
-        ]
-      }
-    })
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@components": path.resolve(__dirname, "./src/components"),
-      "@utils": path.resolve(__dirname, "./src/utils")
     },
   },
   server: {
-    port: 5173,
-    host: true,
-    strictPort: true,
-    hmr: {
-      overlay: true
-    },
     proxy: {
+      // Проксирование API-запросов на локальный сервер разработки
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: false
-      }
-    }
-  },
-  build: {
-    sourcemap: false,
-    minify: 'esbuild',
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'react';
-            }
-            if (id.includes('framer-motion')) {
-              return 'framer';
-            }
-            return 'vendor';
-          }
+        secure: false,
+        rewrite: (path) => path,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Отправка запроса к:', req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Получен ответ для:', req.url, 'статус:', proxyRes.statusCode);
+          });
         }
       }
     },
-    chunkSizeWarningLimit: 1000,
-    cssCodeSplit: true,
-    assetsInlineLimit: 4096
+    cors: true,
+    port: 5173,
+    host: true,
+    open: true,
+    hmr: {
+      overlay: true
+    }
   },
-  optimizeDeps: {
-    include: [
-      'react', 
-      'react-dom', 
-      'framer-motion',
-      '@radix-ui/react-dialog',
-      'lucide-react'
-    ],
-    exclude: [
-      'react-router-dom'
-    ]
+  build: {
+    sourcemap: true,
+    // Используем esbuild вместо terser
+    minify: 'esbuild',
+    // Удаляем настройки terser
+    // terserOptions: {
+    //   compress: {
+    //     drop_console: false,
+    //     drop_debugger: true
+    //   }
+    // }
   }
 })
