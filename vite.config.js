@@ -1,12 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
   plugins: [
     react({
-      // Оптимизация загрузки React
       babel: {
         plugins: [
           'babel-plugin-transform-react-remove-prop-types',
@@ -14,23 +12,16 @@ export default defineConfig({
           '@babel/plugin-transform-react-inline-elements'
         ]
       }
-    }),
-    // Визуализация размера бандла
-    visualizer({
-      filename: './build-stats.html',
-      open: false
     })
   ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Алиасы для быстрой навигации
       "@components": path.resolve(__dirname, "./src/components"),
       "@utils": path.resolve(__dirname, "./src/utils")
     },
   },
   server: {
-    // Настройки dev-сервера
     port: 5173,
     host: true,
     strictPort: true,
@@ -46,12 +37,10 @@ export default defineConfig({
     }
   },
   build: {
-    // Настройки продакшн сборки
-    sourcemap: false, // Убираем source map
-    minify: 'esbuild', // Быстрая минификация
+    sourcemap: false,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        // Разделение кода
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom')) {
@@ -65,13 +54,11 @@ export default defineConfig({
         }
       }
     },
-    // Оптимизация производительности
-    chunkSizeWarningLimit: 1000, // Увеличиваем лимит предупреждений о размере чанка
-    cssCodeSplit: true, // Разделение CSS
-    assetsInlineLimit: 4096 // Встраивание маленьких файлов
+    chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096
   },
   optimizeDeps: {
-    // Предварительная компиляция зависимостей
     include: [
       'react', 
       'react-dom', 
@@ -79,7 +66,6 @@ export default defineConfig({
       '@radix-ui/react-dialog',
       'lucide-react'
     ],
-    // Исключения для пропуска
     exclude: [
       'react-router-dom'
     ]
