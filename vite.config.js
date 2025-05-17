@@ -1,54 +1,87 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { visualizer } from 'rollup-plugin-visualizer'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      // Оптимизация загрузки React
+      babel: {
+        plugins: [
+          'babel-plugin-transform-react-remove-prop-types',
+          '@babel/plugin-transform-react-constant-elements',
+          '@babel/plugin-transform-react-inline-elements'
+        ]
+      }
+    }),
+    // Визуализация размера бандла
+    visualizer({
+      filename: './build-stats.html',
+      open: false
+    })
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // Алиасы для быстрой навигации
+      "@components": path.resolve(__dirname, "./src/components"),
+      "@utils": path.resolve(__dirname, "./src/utils")
     },
   },
   server: {
+    // Настройки dev-сервера
+    port: 5173,
+    host: true,
+    strictPort: true,
+    hmr: {
+      overlay: true
+    },
     proxy: {
-      // Проксирование API-запросов на локальный сервер разработки
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: false,
-        rewrite: (path) => path,
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('proxy error', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Отправка запроса к:', req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Получен ответ для:', req.url, 'статус:', proxyRes.statusCode);
-          });
-        }
+        secure: false
       }
-    },
-    cors: true,
-    port: 5173,
-    host: true,
-    open: true,
-    hmr: {
-      overlay: true
     }
   },
   build: {
-    sourcemap: true,
-    // Используем esbuild вместо terser
-    minify: 'esbuild',
-    // Удаляем настройки terser
-    // terserOptions: {
-    //   compress: {
-    //     drop_console: false,
-    //     drop_debugger: true
-    //   }
-    // }
+    // Настройки продакшн сборки
+    sourcemap: false, // Убираем source map
+    minify: 'esbuild', // Быстрая минификация
+    rollupOptions: {
+      output: {
+        // Разделение кода
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react';
+            }
+            if (id.includes('framer-motion')) {
+              return 'framer';
+            }
+            return 'vendor';
+          }
+        }
+      }
+    },
+    // Оптимизация производительности
+    chunkSizeWarningLimit: 1000, // Увеличиваем лимит предупреждений о размере чанка
+    cssCodeSplit: true, // Разделение CSS
+    assetsInlineLimit: 4096 // Встраивание маленьких файлов
+  },
+  optimizeDeps: {
+    // Предварительная компиляция зависимостей
+    include: [
+      'react', 
+      'react-dom', 
+      'framer-motion',
+      '@radix-ui/react-dialog',
+      'lucide-react'
+    ],
+    // Исключения для пропуска
+    exclude: [
+      'react-router-dom'
+    ]
   }
 })
