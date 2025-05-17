@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+iimport React, { memo, useMemo } from 'react';
 
 // Константы для маппинга иконок
 const weatherIconMapping = {
