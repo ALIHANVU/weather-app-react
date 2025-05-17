@@ -1,30 +1,85 @@
-// Таймауты для запросов
+// Таймауты и настройки
 const TIMEOUTS = {
-  API_REQUEST: 10000 // 10 секунд
+  API_REQUEST: 10000, // 10 секунд
+  CACHE_DURATION: 30 * 60 * 1000 // 30 минут
 }
 
+// Кеширование данных о погоде
+function cacheWeatherData(city, data) {
+  try {
+    localStorage.setItem(`weather_cache_${city}`, JSON.stringify({
+      data,
+      timestamp: Date.now()
+    }));
+  } catch (error) {
+    console.warn('Ошибка кеширования:', error);
+  }
+}
+
+// Получение кешированных данных
+function getCachedWeatherData(city) {
+  try {
+    const cachedData = localStorage.getItem(`weather_cache_${city}`);
+    if (cachedData) {
+      const { data, timestamp } = JSON.parse(cachedData);
+      return (Date.now() - timestamp < TIMEOUTS.CACHE_DURATION) ? data : null;
+    }
+  } catch (error) {
+    console.warn('Ошибка получения кеша:', error);
+  }
+  return null;
+}
+
+// Фоллбек данные
+const FALLBACK_DATA = {
+  weather: {
+    name: 'Москва',
+    main: { 
+      temp: 15, 
+      feels_like: 14, 
+      temp_max: 17, 
+      temp_min: 13, 
+      humidity: 70 
+    },
+    weather: [{ description: 'данные недоступны', icon: '01d' }],
+    wind: { speed: 2.5 },
+    visibility: 10000
+  },
+  forecast: {
+    list: Array(8).fill().map((_, index) => ({
+      dt: Math.floor(Date.now() / 1000) + index * 3600,
+      main: { 
+        temp: 15 - index % 3, 
+        humidity: 70, 
+        feels_like: 14 
+      },
+      weather: [{ icon: '01d' }],
+      wind: { speed: 2.5 },
+      visibility: 10000
+    }))
+  }
+};
+
 /**
- * Получает данные о погоде через Vercel API Routes с повторными попытками
+ * Получает данные о погоде через Vercel API Routes с расширенной обработкой
  * @param {string} city - Название города
  * @param {number} retries - Количество повторных попыток
  * @returns {Promise<Object>} Данные о погоде
  */
 export async function fetchWeatherData(city, retries = 2) {
+  const cachedData = getCachedWeatherData(city);
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
-    console.log('Запрашиваем погоду для города:', city)
+    console.log('Запрашиваем погоду для города:', city);
     
-    // Создаем URL для API маршрута
-    // Используем абсолютный путь, начинающийся с /api
-    const apiUrl = `/api/weather?city=${encodeURIComponent(city)}`
-    
-    console.log('Отправляем запрос к API:', apiUrl)
-    
-    // Добавляем таймаут к запросу
+    const apiUrl = `/api/weather?city=${encodeURIComponent(city)}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.API_REQUEST);
     
     try {
-      // Запрос к нашему API маршруту
       const response = await fetch(apiUrl, { 
         signal: controller.signal,
         method: 'GET',
@@ -34,60 +89,57 @@ export async function fetchWeatherData(city, retries = 2) {
           'Cache-Control': 'no-cache'
         }
       });
+      
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Ошибка API: ${response.status} - ${errorText}`)
+        throw new Error(`Ошибка API: ${response.status}`);
       }
       
       const data = await response.json();
       
-      // Проверяем структуру данных
+      // Валидация данных
       if (!data || (!data.weather && !data.error)) {
-        throw new Error('Неверный формат данных от API')
+        throw new Error('Неверный формат данных');
       }
       
-      // Проверяем наличие ошибки в ответе
       if (data.error) {
-        throw new Error(data.error)
+        throw new Error(data.error);
       }
+      
+      // Кешируем успешный ответ
+      cacheWeatherData(city, data);
       
       return data;
+      
     } catch (fetchError) {
       clearTimeout(timeoutId);
       
-      // Проверяем, является ли ошибка отменой из-за таймаута
       if (fetchError.name === 'AbortError') {
-        throw new Error('Превышено время ожидания запроса');
+        console.warn('Превышено время ожидания');
+        return FALLBACK_DATA;
       }
       
       throw fetchError;
     }
   } catch (error) {
-    console.error('Ошибка получения данных о погоде:', error.message)
+    console.error('Ошибка получения данных о погоде:', error.message);
     
     // Повторные попытки с задержкой
     if (retries > 0) {
-      console.log(`Повторная попытка (осталось ${retries}). Ожидание 1 секунду...`);
       await new Promise(resolve => setTimeout(resolve, 1000));
       return fetchWeatherData(city, retries - 1);
     }
     
-    throw error
+    // Возвращаем данные по умолчанию
+    return FALLBACK_DATA;
   }
 }
 
-/**
- * Загружает советы для фермеров с механизмом повторных попыток
- * @returns {Promise<Object>} Советы
- */
+// Загрузка советов для фермеров
 export async function loadFarmerTips(retries = 2) {
   try {
-    // Добавляем параметр с временем для предотвращения кеширования
-    const timestamp = new Date().getTime()
-    
-    // Устанавливаем таймаут
+    const timestamp = new Date().getTime();
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.API_REQUEST);
     
@@ -104,77 +156,51 @@ export async function loadFarmerTips(retries = 2) {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error(`Ошибка загрузки: ${response.status}`);
       }
       
-      const data = await response.json()
-      return data
+      return await response.json();
+      
     } catch (fetchError) {
       clearTimeout(timeoutId);
       
-      // Проверяем, является ли ошибка отменой из-за таймаута
       if (fetchError.name === 'AbortError') {
-        throw new Error('Превышено время ожидания запроса');
+        console.warn('Превышено время ожидания советов');
+        return getDefaultTips();
       }
       
       throw fetchError;
     }
   } catch (error) {
-    console.warn('Ошибка загрузки советов:', error.message)
+    console.warn('Ошибка загрузки советов:', error.message);
     
-    // Повторные попытки с задержкой
     if (retries > 0) {
-      console.log(`Повторная попытка загрузки советов (осталось ${retries}). Ожидание 1 секунду...`);
       await new Promise(resolve => setTimeout(resolve, 1000));
       return loadFarmerTips(retries - 1);
     }
     
-    // Резервные советы, если сервер недоступен
-    return {
-      "temperature": {
-        "hot": {
-          "min": 25,
-          "tips": ["Поливайте растения рано утром или вечером", "Используйте мульчу для удержания влаги"]
-        },
-        "moderate": {
-          "min": 15,
-          "max": 24,
-          "tips": ["Идеальное время для обрезки растений", "Проверьте наличие вредителей на растениях"]
-        },
-        "cold": {
-          "max": 14,
-          "tips": ["Защитите растения от заморозков", "Ограничьте полив в холодную погоду"]
-        }
-      },
-      "humidity": {
-        "high": {
-          "min": 70,
-          "tips": ["Следите за появлением грибковых заболеваний", "Обеспечьте хорошую вентиляцию растений"]
-        },
-        "normal": {
-          "min": 40,
-          "max": 69,
-          "tips": ["Поддерживайте регулярный полив", "Проверьте влажность почвы перед поливом"]
-        },
-        "low": {
-          "max": 39,
-          "tips": ["Увеличьте частоту полива", "Используйте системы капельного орошения"]
-        }
-      },
-      "seasons": {
-        "spring": {
-          "tips": ["Подготовьте грядки к посадке", "Начните высаживать холодостойкие культуры"]
-        },
-        "summer": {
-          "tips": ["Защитите растения от перегрева", "Собирайте урожай регулярно"]
-        },
-        "autumn": {
-          "tips": ["Подготовьте сад к зиме", "Время для посадки озимых культур"]
-        },
-        "winter": {
-          "tips": ["Защитите многолетние растения от мороза", "Планируйте посадки на следующий сезон"]
-        }
-      }
-    }
+    return getDefaultTips();
   }
+}
+
+// Резервные советы
+function getDefaultTips() {
+  return {
+    temperature: {
+      hot: { tips: ["Поливайте растения рано утром или вечером"] },
+      moderate: { tips: ["Хорошее время для ухода за растениями"] },
+      cold: { tips: ["Защитите растения от холода"] }
+    },
+    humidity: {
+      high: { tips: ["Следите за вентиляцией"] },
+      normal: { tips: ["Поддерживайте регулярный полив"] },
+      low: { tips: ["Увеличьте орошение"] }
+    },
+    seasons: {
+      spring: { tips: ["Подготовьте почву"] },
+      summer: { tips: ["Защитите растения от перегрева"] },
+      autumn: { tips: ["Подготовьте сад к зиме"] },
+      winter: { tips: ["Защитите растения от мороза"] }
+    }
+  };
 }
